@@ -1,0 +1,36 @@
+(function() { 
+	this
+	
+	// variables
+	.vars('color', 'yellow')
+	.vars({
+		size: 11,
+		unit: 'px'
+	})
+	
+	// named properties
+	.props('allPadding', 'padding', '100px !important')
+	
+	// named styles
+	.styles('basic', [
+		this.props.allPadding,
+		this.prop('background-color', this.vars.color)
+	])
+	.styles('basic2', this.prop('color', 'red'))
+	
+	// selectors
+	.sel('Everywhere', 'body')
+	.sel('MainArea', '#d1')
+	
+	// at-rules
+	.at('fonts', 'font-face') 
+	
+	// apply styles
+	.apply(this.sel.Everywhere, [
+		this.styles.basic,
+		this.styles.basic2
+	])
+	
+	// done
+	.end(); 
+}.apply(JS3.css('basic')));
