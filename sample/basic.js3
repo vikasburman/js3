@@ -2,21 +2,22 @@
 	this
 	
 	// variables
-	.vars('color', 'yellow')
-	.vars({
+	.vars('color', 'yellow') // one variable
+	.vars({					 // multiple variables
 		size: 11,
 		unit: 'px'
-	})
+	}) 
 	
-	// named properties
-	.props('allPadding', 'padding', '100px !important')
+	// named declarations
+	.decls('allPadding', 'padding', 100, 'px !important')
+	.decls('allPadding2', 'padding', '200', 'px !important')
 	
 	// named styles
 	.styles('basic', [
-		this.props.allPadding,
-		this.prop('background-color', this.vars.color)
+		this.decls.allPadding,
+		this.decl('background-color', this.vars.color) // in-place declaration
 	])
-	.styles('basic2', this.prop('color', 'red'))
+	.styles('basic2', this.decl('color', 'red'))
 	
 	// selectors
 	.sel('Everywhere', 'body')
@@ -27,8 +28,12 @@
 	
 	// apply styles
 	.apply(this.sel.Everywhere, [
-		this.styles.basic,
-		this.styles.basic2
+		this.styles.basic,	// using named styles
+		this.styles.basic2,	
+		this.style([		// using in-place style declaration			
+			this.decl('text-align', 'right'),
+			this.decl('letter-spacing', 5, 'px')
+		])
 	])
 	
 	// done
