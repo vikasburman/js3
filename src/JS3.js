@@ -38,6 +38,9 @@
 		var isLoaded = false;
 		var xref = false;
 		var isDirty = false;
+		var isDone = false;
+		var isLoadAfterDone = false;
+		var isEnd = false;
 		var randomName = function() { 
 			var S4 = function() { return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1); };
 			return ("_" + S4() + S4() + '_' + S4() + '_' + S4() + '_' + S4() + '_' + S4() + S4() + S4());		
@@ -56,6 +59,10 @@
 			for (index = 0; index < allItems.length; ++index) {
 				item = allItems[index];
 				applyTo = item.applyTo();
+				
+				// TODO: using isConsiderScopes, selectorScopes, generate multiple styles
+				// for various selectors which canBeScoped
+				
 				styles = item.styles;
 				allStyles = '';
 				for (index2 = 0; index2 < styles.length; ++index2) {
@@ -100,6 +107,7 @@
 		};
 		
 		// definition
+		var selectorScopes = [];
 		var valueTypes = {
 			vars: 'variable',
 			decl: 'declaration',
@@ -455,7 +463,7 @@
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
 			return wrapper;			
 		};
-		var selWrapper = function(selName, selValueWrapper) {
+		var selWrapper = function(selName, canBeScoped, selValueWrapper) {
 			var wrapper = function(newSelectorOrFunc) {
 				if (newSelectorOrFunc) { 
 					var oldValue = selValueWrapper(); 
@@ -469,6 +477,7 @@
 			wrapper.clear = function(namedStyle) { self.clear(self.sel[selName], namedStyle); };
 			wrapper.raw = {};
 			wrapper.raw.name = function() { return selName; };
+			wrapper.raw.canBeScoped = function() { return canBeScoped; };
 			wrapper.raw.value = function() { return selValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
 			return wrapper;	
@@ -525,8 +534,8 @@
 			}
 			return self;
 		};
-		self.sel = function(name, selectorOrFunc) {
-			if (name) { self.sel[name] = selWrapper(name, selValueWrapperFunc(selectorOrFunc)); }
+		self.sel = function(name, selectorOrFunc, canBeScoped) {
+			if (name) { self.sel[name] = selWrapper(name, canBeScoped, selValueWrapperFunc(selectorOrFunc)); }
 			return self;
 		};		
 		self.at = function(name, atRule, atRuleQueryOrIdentifierOrFunc) {
@@ -603,9 +612,34 @@
 				self.clear(selOrAt, style);
 			}		
 		};		
+		
+		// either end or (done first and load later will be used)
+		self.done = function() {
+			if (!isEnd) {
+				isDirty = true;
+				isDone = true;
+			}
+		};
+		self.load = function() {
+			if (isDone) {
+				if (!isLoadAfterDone) {
+					isLoadAfterDone = true;
+					if (arguments.length > 0) { 
+						selectorScopes = Array.prototype.slice.call(arguments, 0);
+					}					
+					isDirty = true; 
+					self.reload();
+				} else {
+					self.reload();
+				}
+			}
+		};
 		self.end = function() {
-			isDirty = true; 
-			self.reload();
+			if (!isDone) {
+				isDirty = true; 
+				isEnd = true;
+				self.reload();
+			}
 		};
 		
 		// general
@@ -614,21 +648,21 @@
 		self.isChanged = function() { return isDirty; };
 		self.name = function() { return fileName; };
 		self.reload = function() { 
-			if (isDirty) { 
+			if ((isDirty && !isDone) || (isDirty && isDone && isLoadAfterDone)) { 
 				loadCSS(); 
-				if (xref) { self.parent.reload.dependents(fileName) }
+				if (xref) { self.parent.reload.dependents(fileName); }
 			}
 		};
 		self.unload = function() { 
 			if (isLoaded) { 
 				unloadCSS(); 
-				if (xref) { self.parent.unload.dependents(fileName) }
+				if (xref) { self.parent.unload.dependents(fileName); }
 			}
 		};
 		self.remove = function() {
 			self.unload();
 			self.parent.css.remove(self.name());
-			if (xref) { self.parent.remove.dependents(fileName) }
+			if (xref) { self.parent.remove.dependents(fileName); }
 		};
 	};
 	var JS3 = function() {
@@ -648,6 +682,7 @@
 		core.settings.isLogChanges = true;
 		core.settings.isLoadExtensions = true;
 		core.settings.isReloadOnChange = false;
+		core.settings.isConsiderScopes = true;
 		
 		// files
 		var allFiles = [];
@@ -745,7 +780,7 @@
 			for (index = 0; index < dependentFiles.length; ++index) {
 			   dependentFile = dependentFiles[index];
 			   css = core[dependentFile];
-			   if (css) { css.unload() }
+			   if (css) { css.unload(); }
 			}
 		};		
 		core.reload = {};
@@ -765,7 +800,7 @@
 			for (index = 0; index < dependentFiles.length; ++index) {
 			   dependentFile = dependentFiles[index];
 			   css = core[dependentFile];
-			   if (css) { css.reload() }
+			   if (css) { css.reload(); }
 			}
 		};
 		core.remove = {};
@@ -787,7 +822,7 @@
 			for (index = 0; index < dependentFiles.length; ++index) {
 			   dependentFile = dependentFiles[index];
 			   css = core[dependentFile];
-			   if (css) { css.remove() }
+			   if (css) { css.remove(); }
 			}
 		};
 	};
