@@ -36,6 +36,7 @@
 		var allItems = [];
 		var id = '';
 		var isLoaded = false;
+		var xref = false;
 		var isDirty = false;
 		var randomName = function() { 
 			var S4 = function() { return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1); };
@@ -110,19 +111,28 @@
 			isDirty = true;
 			if (isLoaded && self.parent.settings.isLogChanges) {
 				window.console.log(count.toString() + ' new style' + (count > 1 ? 's are' : ' is') + ' added to ' + type  + ' "' + to + '".');
-			}		
+			}
+			if (isLoaded && self.parent.settings.isReloadOnChange) {
+				self.reload();
+			}			
 		};
 		var styleRemoved = function(name, type, from) {
 			isDirty = true;
 			if (isLoaded && self.parent.settings.isLogChanges) {
 				window.console.log('Style "' + name + '" is removed from ' + type  + ' "' + from + '".');
-			}		
+			}
+			if (isLoaded && self.parent.settings.isReloadOnChange) {
+				self.reload();
+			}			
 		};
 		var valueChanged = function(type, name, oldValue, newValue) {
 			isDirty = true;
 			if (isLoaded && self.parent.settings.isLogChanges) {
 				window.console.log('Value of ' + type + ' "' + name + '" is changed from "' + oldValue + '" to "' + newValue + '".');
 			}
+			if (isLoaded && self.parent.settings.isReloadOnChange) {
+				self.reload();
+			}	
 		};
 		var varValueWrapperFunc = function(varValueOrFunc) {
 			var getValue = function() { return null; };
@@ -485,6 +495,13 @@
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
 			return wrapper;			
 		};
+		self.xref = function() {
+			if (arguments.length > 0) { 
+				self.parent.xref(fileName, Array.prototype.slice.call(arguments, 0)); 
+				xref = true;
+			}
+			return self;
+		};
 		self.decl = function(propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
 			return declWrapper(randomName(), propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone));
 		};
@@ -597,14 +614,21 @@
 		self.isChanged = function() { return isDirty; };
 		self.name = function() { return fileName; };
 		self.reload = function() { 
-			if (isDirty) { loadCSS(); }
+			if (isDirty) { 
+				loadCSS(); 
+				if (xref) { self.parent.reload.dependents(fileName) }
+			}
 		};
 		self.unload = function() { 
-			if (isLoaded) { unloadCSS(); }
+			if (isLoaded) { 
+				unloadCSS(); 
+				if (xref) { self.parent.unload.dependents(fileName) }
+			}
 		};
 		self.remove = function() {
 			self.unload();
 			self.parent.css.remove(self.name());
+			if (xref) { self.parent.remove.dependents(fileName) }
 		};
 	};
 	var JS3 = function() {
@@ -623,10 +647,24 @@
 		core.settings = {};
 		core.settings.isLogChanges = true;
 		core.settings.isLoadExtensions = true;
+		core.settings.isReloadOnChange = false;
 		
 		// files
 		var allFiles = [];
+		var xref = {};
 		core.all = function() { return allFiles; };
+		core.xref = function(inFile, otherFilesArray) {
+			var otherFiles = (xref[inFile] || []);
+			var index = 0;
+			var otherFile = '';
+			for (index = 0; index < otherFilesArray.length; ++index) {
+			   otherFile = otherFilesArray[index];
+			   if (otherFile !== inFile && otherFiles.indexOf(otherFile) === -1) {
+					otherFiles.push(otherFile);
+			   }
+			}
+			xref[inFile] = otherFiles;
+		};
 		
 		// definition
 		core.css = function(fileName) {
@@ -690,7 +728,8 @@
 		};
 		
 		// changes
-		core.unloadAll = function() {
+		core.unload = {};
+		core.unload.all = function() {
 			var index = 0;
 			var css = null;
 			for (index = 0; index < allFiles.length; ++index) {
@@ -698,7 +737,19 @@
 			   css.unload();
 			}			
 		};
-		core.reloadAll = function() {
+		core.unload.dependents = function(ofFileName) {
+			var dependentFiles = (xref[ofFileName] || []);
+			var index = 0;
+			var dependentFile = '';
+			var css = null;
+			for (index = 0; index < dependentFiles.length; ++index) {
+			   dependentFile = dependentFiles[index];
+			   css = core[dependentFile];
+			   if (css) { css.unload() }
+			}
+		};		
+		core.reload = {};
+		core.reload.all = function() {
 			var index = 0;
 			var css = null;
 			for (index = 0; index < allFiles.length; ++index) {
@@ -706,7 +757,19 @@
 			   css.reload();
 			}			
 		};
-		core.removeAll = function() {
+		core.reload.dependents = function(ofFileName) {
+			var dependentFiles = (xref[ofFileName] || []);
+			var index = 0;
+			var dependentFile = '';
+			var css = null;
+			for (index = 0; index < dependentFiles.length; ++index) {
+			   dependentFile = dependentFiles[index];
+			   css = core[dependentFile];
+			   if (css) { css.reload() }
+			}
+		};
+		core.remove = {};
+		core.remove.all = function() {
 			core.unloadAll();
 			var index = 0;
 			var css = null;
@@ -715,6 +778,17 @@
 			   delete core[css.name()];
 			}
 			allFiles = [];
+		};
+		core.remove.dependents = function(ofFileName) {
+			var dependentFiles = (xref[ofFileName] || []);
+			var index = 0;
+			var dependentFile = '';
+			var css = null;
+			for (index = 0; index < dependentFiles.length; ++index) {
+			   dependentFile = dependentFiles[index];
+			   css = core[dependentFile];
+			   if (css) { css.remove() }
+			}
 		};
 	};
 	
