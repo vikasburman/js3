@@ -41,35 +41,55 @@
 		var isDone = false;
 		var isLoadAfterDone = false;
 		var isEnd = false;
+		var selectorScopes = [];
+		var valueTypes = {
+			vars: 'variable',
+			decl: 'declaration',
+			style: 'style',
+			sel: 'selector',
+			at: 'at-rule'
+		};			
 		var randomName = function() { 
 			var S4 = function() { return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1); };
 			return ("_" + S4() + S4() + '_' + S4() + '_' + S4() + '_' + S4() + '_' + S4() + S4() + S4());		
 		};
 		var getNewId = function() { return 'js3_' + fileName + randomName(); };
+		var generateStyles = function(styles) {
+			var allStyles = '';
+			var style = null;		
+			var index = 0;			
+			for (index = 0; index < styles.length; ++index) {
+				style = styles[index];
+				allStyles += ' ' + style.apply(self);
+			}
+			return allStyles;
+		};
 		var generateCSS = function() {
 			var css = '';
 			var item = null;
 			var applyTo = '';
-			var styles = [];
-			var style = null;
 			var itemCss = '';
-			var allStyles = '';
+			var scopedItemCss = '';
+			var styles = '';
 			var index = 0;
 			var index2 = 0;
+			var scope = '';
 			for (index = 0; index < allItems.length; ++index) {
 				item = allItems[index];
 				applyTo = item.applyTo();
-				
-				// TODO: using isConsiderScopes, selectorScopes, generate multiple styles
-				// for various selectors which canBeScoped
-				
-				styles = item.styles;
-				allStyles = '';
-				for (index2 = 0; index2 < styles.length; ++index2) {
-					style = styles[index2];
-					allStyles += ' ' + style.apply(self);
+				styles = applyTo.replace(stylesPlaceHolder, generateStyles(item.styles)) ;
+				if (item.applyTo.type() === valueTypes.sel &&
+					item.applyTo.raw.canBeScoped() && 
+					self.parent.settings.isConsiderScopes && 
+					selectorScopes.length > 0) {
+					for (index2 = 0; index2 < selectorScopes.length; ++index2) {
+						scope = selectorScopes[index2];
+						scopedItemCss += (scope + ' ' + styles);
+					}
+					itemCss = scopedItemCss;	
+				} else {
+					itemCss = styles;
 				}
-				itemCss = applyTo.replace(stylesPlaceHolder, allStyles);
 				css += ' ' + itemCss;
 			}	
 			return css;
@@ -107,14 +127,6 @@
 		};
 		
 		// definition
-		var selectorScopes = [];
-		var valueTypes = {
-			vars: 'variable',
-			decl: 'declaration',
-			style: 'style',
-			sel: 'selector',
-			at: 'at-rule'
-		};		
 		var stylesAdded = function(count, type, to) {
 			isDirty = true;
 			if (isLoaded && self.parent.settings.isLogChanges) {
@@ -464,6 +476,7 @@
 			return wrapper;			
 		};
 		var selWrapper = function(selName, canBeScoped, selValueWrapper) {
+			canBeScoped = (canBeScoped || false);
 			var wrapper = function(newSelectorOrFunc) {
 				if (newSelectorOrFunc) { 
 					var oldValue = selValueWrapper(); 
@@ -629,8 +642,6 @@
 					}					
 					isDirty = true; 
 					self.reload();
-				} else {
-					self.reload();
 				}
 			}
 		};
@@ -763,6 +774,15 @@
 		};
 		
 		// changes
+		core.load = {};
+		core.load.all = function() {
+			var index = 0;
+			var css = null;
+			for (index = 0; index < allFiles.length; ++index) {
+			   css = allFiles[index];
+			   css.load.apply(css, arguments);
+			}	
+		};
 		core.unload = {};
 		core.unload.all = function() {
 			var index = 0;
