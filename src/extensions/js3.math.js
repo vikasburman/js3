@@ -12,6 +12,7 @@
   */
 (function() {
 	"use strict";
+	// TODO: 3rd and 4th para should also support array
 	JS3.ex('math', ['declaration', 'variable'], 'number', '*', function(wrapper) {
 		// extend wrapper
 		wrapper.add = function(number) {
