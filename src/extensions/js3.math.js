@@ -12,28 +12,23 @@
   */
 (function() {
 	"use strict";
-	JS3.ex('math', ['declaration', 'variable'], 'number', '*', function() {
-		var wrapper = this;
-		var self = wrapper.parent;
-
-		// build extension
-		var ex = {};
-		ex.add = function(number) {
+	JS3.ex('math', ['declaration', 'variable'], 'number', '*', function(wrapper) {
+		// extend wrapper
+		wrapper.add = function(number) {
 			if (typeof number !== 'number') { throw 'invalid argument'; }
 			wrapper(wrapper.raw.value() + number); // update
 		};
-		ex.substract = function(number) {
+		wrapper.substract = function(number) {
 			if (typeof number !== 'number') { throw 'invalid argument'; }
 			wrapper(wrapper.raw.value() - number); // update			
 		};
-		ex.multiply = function(number) {
+		wrapper.multiply = function(number) {
 			if (typeof number !== 'number') { throw 'invalid argument'; }
 			wrapper(wrapper.raw.value() * number); // update			
 		};
-		ex.divide = function(number) {
+		wrapper.divide = function(number) {
 			if (typeof number !== 'number') { throw 'invalid argument'; }
 			wrapper(wrapper.raw.value() / number); // update			
 		};
-		return ex;
 	});	
 }());

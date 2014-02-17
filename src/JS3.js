@@ -760,14 +760,14 @@
 		core.ex.me = function(css, wrapper, valueObjectType, valueObjectDataType, valueType) {
 			var ex = null;
 			var property = null;
-			wrapper.parent = css;
+			wrapper.parent = wrapper.parent || css;
 			for (property in allEx) {
 				if (allEx.hasOwnProperty(property)) {
 					ex = allEx[property];
 					if (ex.targetValueType === valueObjectType &&
 						(ex.targetValueDataType === valueObjectDataType || ex.targetValueDataType === '') &&
 						(ex.targetType === valueType || ex.targetType === '')) {
-						wrapper[ex.exName] = ex.classFunc.apply(wrapper);
+						ex.classFunc(wrapper); // let it add on to wrapper as required
 					}
 				}
 			}		
