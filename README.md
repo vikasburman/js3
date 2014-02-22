@@ -1,6 +1,6 @@
 JavaScript StyleSheet - JS3
 === 
-Instead of putting programming in CSS, it puts CSS in a programming language. 
+> Instead of putting programming in CSS, it puts CSS in a programming language. 
 
 
 Introduction
