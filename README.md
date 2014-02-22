@@ -6,15 +6,15 @@ JavaScript StyleSheet - JS3
 Introduction
 ---
 
-As more and more development is moving towards client side, different opportunities are opening up and traditional styles of doing everything is undergoing drastic changes. CSS is one such case.
+As more and more development is moving towards client side, different opportunities are opening up and traditional styles of doing everything are undergoing drastic changes. CSS is one such case.
 
-CSSes used to be static style definitions, with pre-processors like LESS and SASS, CSS management becomes much easier. With pre-processors static stylesheets get some life in form of variables, mixins, inheritance, etc. However once processed, they again become static CSS files. All that liveliness remained inside the xxSS execution engine during xxSS processing.
+CSSes used to be static style definitions, but with pre-processors like LESS and SASS, CSS management becomes much easier. With pre-processors, static stylesheets get some life in form of variables, mixins, inheritance, etc. However once processed, they again become static CSS files. Therefore all that liveliness remained inside the xxSS execution engine where xxSS processing happens.
 
-This is where JS3 brings the difference. It creates *live* CSS with almost zero learning curve as there are *NO* new constructs beyond what is available in CSS. A *live* CSS is a javascript object that transparently writes/updates CSS (in browser) in real-time, as you play with this object. 
+**This is where JS3 brings the difference.** It creates *live* CSS. A *live* CSS is a javascript object that transparently writes/updates CSS (in browser) in real-time, as you play with this object. 
 
 You no longer need to think in terms of having different class for different scenarios and using javascript switch classes. JS3 gives access to each style rule, collections, selectors, etc. as an object which you can play around with directly or indirectly with embedded javascript functions.
 
-JS3 can load predefined *.js3 files (comparable to *.css files) or can define a CSS on the fly using pure javascript. 
+JS3 can load predefined *.js3 files (comparable to *.css files) or can even define a new CSS on the fly using pure javascript. 
 
 Features
 ---
@@ -71,7 +71,7 @@ That's all is needed to start using the power of JS3.
 Create your first `.js3` file
 ---
 
-> A: The empty `.js3` file looks as below. Note this is defining a new CSS object using `JS3.css(<objectName>)` call and passing the resulting new css object as `this` context here:
+> A: The empty `.js3` file looks as below. Note that this is defining a new CSS object using `JS3.css(<objectName>)` call and passing the resulting new css object as `this` context here:
 
 ```javascript
 (function() { 
@@ -81,7 +81,7 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-> B: Define variables that you may want to change at runtime later or that you may want to use across different files:
+> B: Define variables that you may want to change later or may want to share across different files:
 
 ```javascript
 (function() { 
@@ -92,9 +92,9 @@ Create your first `.js3` file
 
 }.apply(JS3.css('styles1')));
 ```
-**Note the use of `this` and no `;` at the end. It helps in chaining the calls together.**
+**Note the use of `this` and absence of a `;` at the end of variable definition. It helps in chaining the calls together.**
 
-> C: Define named style rules that you may want to use in multiple styles or change at runtime later or that you may want to use across different files:
+> C: Define named style rules that you may want to re-use in multiple styles or change later or share across different files:
 
 ```javascript
 (function() { 
@@ -109,7 +109,7 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-> D: Define named styles (collection of style rules) that you may want to apply on multiple selectors or want to change at runtime later or that you may want to use across different files:
+> D: Define named styles (i.e., a collection of style rules) that you may want to apply on multiple selectors or change later or share across different files:
 
 ```javascript
 (function() { 
@@ -127,9 +127,9 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-**Note the in-place definition of a rule when defining the style. Not every rule needs to be a named rule when there is limited use. Also note the use of the variable in the style rule.**
+**Note the in-place definition of a style inside style definition itself. As not every rule needs to be a named rule when there is a limited use of it. Also note the use of the variable in the style rule.**
 
-> E: Define named selectors to identify various regions of your webpage for easy styling. Like everything else, these can also be changed at runtime or can be shared across files:
+> E: Define named selectors to identify various regions of your page for easy styling. Like everything else, these can also be changed or shared across files:
 
 ```javascript
 (function() { 
@@ -159,7 +159,7 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-> G: Once all definitions are done, start building up the stylesheet by applying styles to selectors, at-rules, etc.
+> G: Once all definitions are done, start building up the stylesheet by applying styles to selectors, and at-rules, etc.
 
 ```javascript
 (function() { 
@@ -184,9 +184,9 @@ Create your first `.js3` file
 	)
 }.apply(JS3.css('styles1')));
 ```
-**Note, how styles defined once, are being reused with multiple selectors. Also note how less used styles can be defined in-place without the need of defining them as named styles.**
+**Note, how styles that are defined once are being reused with multiple selectors. Also note, how styles can be defined in-place instead of being defined as named styles.**
 
-> H: Once everything is done, mark closure:
+> H: Once everything is done, mark closure of it using `end()`:
 
 ```javascript
 (function() { 
@@ -198,9 +198,9 @@ Create your first `.js3` file
 	.end(); 
 }.apply(JS3.css('styles1')));
 ```
-**Note the use of `;` here stops further chaining of calls.**
+**Note the use of `;` after `end()`. This stops further chaining of calls.**
 
-> I: Here is how complete `.js3` file looks like. Once this is loaded these styles will be available through `JS3.styles1` object (because the name we used here is `styles1`):
+> I: Here is how complete `styles1.js3` file looks like. Once this is loaded, all these styles will be available through `JS3.styles1` object:
 
 ```javascript
 (function() { 
@@ -248,44 +248,43 @@ Create your first `.js3` file
 	.end(); 
 }.apply(JS3.css('styles1')));
 ```
-**Note, everything is plain javascript here.**
 
 Using the power of JS3
 ---
 
-`JS3` global object provides access to all functionalists as well as all loaded stylesheets. Check out API for complete details. Some quick samples to give you an idea of various possibilities:
+`JS3` global object provides access to all core functionalists as well as all loaded stylesheets. Some quick samples to give you an idea of various possibilities are:
 
-> **Change variable's value:** Change will impact all style rules where 'backgroundColor' variable would have been used.
+> **Change variable's value:** 
 
 ```
 JS3.styles1.vars.backgroundColor('green');
 ```
 
-> **Turn a style rule off:** Change will impact an update of all styles where this style rule would have been used.
+> **Turn a style rule off:**
 
 ```
 JS3.styles1.rules.allPadding.off();
 ```
 
-> **Add new style rule:** Change will impact an update of style where this style rule is being added.
+> **Add new style rule:** 
 
 ```
 JS3.styles1.styles.basic.rules.add(this.rule('background-color', 'red'));
 ```
 
-> **Add new style to a selector:** Change will impact the selector.
+> **Add new style to a selector:** 
 
 ```
 JS3.styles1.sel.MainArea.styles.add(this.style(this.rule('background-color', 'white')));
 ```
 
-> **Change selector definition:** Change will impact applying the styles on to this new selector; and removing styles from old selector value.
+> **Change selector definition itself:** 
 
 ```
 JS3.styles1.sel.MainArea('#d3');
 ```
 
-> **Across files re-usability:** Access definitions from other files into this file. Remember to cross-reference (using `xref`) to enable cascade updates. In following case, whenever `allPadding2` style or `backgroundColor2` is updated in `styles2` or `styles3` objects respectively, `basic` style here in `styles1` object will also be updated.
+> **Across files re-usability:** Access definitions from other files into current file. 
 
 ```
 (function() { 
@@ -299,7 +298,7 @@ JS3.styles1.sel.MainArea('#d3');
 }.apply(JS3.css('styles1')));
 ```
 
-> **Perform batch changes:** Change will not reflect on DOM until last call in the sequence below.
+> **Perform batch changes:** 
 
 ```
 JS3.suspendUpdates();
@@ -310,7 +309,7 @@ JS3.styles1.sel.MainArea('#d3');
 JS3.resumeUpdates();
 ```
 
-> **Remain informed:** Attach event handler and do anything else that is required when something changes anywhere.
+> **Remain informed:** 
 
 ```
 JS3.onChange('myHandler', function(e) {
@@ -321,7 +320,7 @@ JS3.onChange('myHandler', function(e) {
 });
 ```
 
-> Possibilities are many. Check out the API to see what all is available.
+> Possibilities are many. Check out the [API](https://github.com/vikasburman/js3/wiki) to see what all is available.
 
 **Power of JS3 comes from following *five* key factors:**
 
@@ -333,7 +332,7 @@ JS3.onChange('myHandler', function(e) {
 
 API
 ---
-Check out the API here.
+API documentation is available [here](https://github.com/vikasburman/js3/wiki).
 
 Release History
 ---
@@ -344,5 +343,3 @@ License
 Copyright (C) 2014 Vikas Burman. All rights reserved.
 
 Licensed under the terms of the [MIT license](https://github.com/vikasburman/js3/blob/master/LICENSE.md). You are free to use **JS3** under any open source or commercial project, as long as this copyright header is left intact.
-
----
