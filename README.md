@@ -320,7 +320,7 @@ JS3.onChange('myHandler', function(e) {
 });
 ```
 
-> Possibilities are many. Check out the [API](https://github.com/vikasburman/js3/wiki) to see what all is available.
+> Possibilities are many. Check out the [documentation](https://github.com/vikasburman/js3/wiki) to see what all is available.
 
 **Power of JS3 comes from following *five* key factors:**
 
@@ -330,9 +330,9 @@ JS3.onChange('myHandler', function(e) {
 * Extensions helps in bringing domain (i.e., css) specific functionality right at the place of use
 * Scopes helps in loading styles in a shared space without bleeding outside defined boundaries
 
-API
+Documentation
 ---
-API documentation is available [here](https://github.com/vikasburman/js3/wiki).
+JS3 documentation is available [here](https://github.com/vikasburman/js3/wiki).
 
 Release History
 ---
