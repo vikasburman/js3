@@ -270,26 +270,31 @@ JS3.styles1.vars.backgroundColor('green');
 ```
 
 > **Turn a style rule off:** Change will impact an update of all styles where this style rule would have been used.
+
 ```
 JS3.styles1.rules.allPadding.off();
 ```
 
 > **Add new style rule:** Change will impact an update of style where this style rule is being added.
+
 ```
 JS3.styles1.styles.basic.rules.add(this.rule('background-color', 'red'));
 ```
 
 > **Add new style to a selector:** Change will impact the selector.
+
 ```
 JS3.styles1.sel.MainArea.styles.add(this.style(this.rule('background-color', 'white')));
 ```
 
 > **Change selector definition:** Change will impact applying the styles on to this new selector; and removing styles from old selector value.
+
 ```
 JS3.styles1.sel.MainArea('#d3');
 ```
 
 > **Across files re-usability:** Access definitions from other files into this file. Remember to cross-reference (using `xref`) to enable cascade updates. In following case, whenever `allPadding2` style or `backgroundColor2` is updated in `styles2` or `styles3` objects respectively, `basic` style here in `styles1` object will also be updated.
+
 ```
 (function() { 
 
@@ -303,6 +308,7 @@ JS3.styles1.sel.MainArea('#d3');
 ```
 
 > **Perform batch changes:** Change will not reflect on DOM until last call in the sequence below.
+
 ```
 JS3.suspendUpdates();
 ...
@@ -313,6 +319,7 @@ JS3.resumeUpdates();
 ```
 
 > **Remain informed:** Attach event handler and do anything else that is required when something changes anywhere.
+
 ```
 JS3.onChange('myHandler', function(e) {
 
@@ -321,6 +328,7 @@ JS3.onChange('myHandler', function(e) {
 
 });
 ```
+
 > Possibilities are many. Check out the API to see what all is available.
 
 Examples
