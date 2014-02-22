@@ -1,7 +1,7 @@
 module.exports = function(grunt) {
 
   grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
+    pkg: grunt.file.readJSON('bower.json'),
 	
     concat: {
       options: {
@@ -12,6 +12,15 @@ module.exports = function(grunt) {
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
+	
+	copy: {
+		main: {
+			files: [{
+				src: 'src/<%= pkg.name %>.js',
+				dest: 'dist/<%= pkg.name %>.core.js'
+			}]
+		}
+	},
 	
     uglify: {
       options: {
@@ -27,10 +36,12 @@ module.exports = function(grunt) {
 	  
       dist: {
         files: {
-          'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+          'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>'],
+          'dist/<%= pkg.name %>.core.min.js': ['<%= copy.main.files[0].dest %>']
         }
       }
     },
+	
     jshint: {
 		files: ['gruntfile.js', 'src/**/*.js'],
 		options: {
@@ -48,6 +59,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
+  grunt.registerTask('default', ['jshint', 'copy', 'concat', 'uglify']);
 };

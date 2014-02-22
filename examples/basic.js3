@@ -8,33 +8,64 @@
 		unit: 'px'
 	}) 
 	
-	// named declarations
-	.decls('allPadding', 'padding', 100, 'px !important')
-	.decls('allPadding2', 'padding', '200', 'px !important')
+	// named rules
+	.rules('allPadding', 'padding', 100, 'px !important')
+	.rules('allPadding2', 'padding', '200', 'px !important')
 	
 	// named styles
 	.styles('basic', [
-		this.decls.allPadding,
-		this.decl('background-color', this.vars.color) // in-place declaration
+		this.rules.allPadding,
+		this.rule('background-color', this.vars.color) // in-place rule
 	])
-	.styles('basic2', this.decl('color', 'red'))
+	.styles('basic2', this.rule('color', 'red'))
+	.styles('basic3', this.rule('color', 'blue'))
+	.styles('basic4', this.rule('font-style', 'underline'))
 	
 	// selectors
 	.sel('Everywhere', 'body')
 	.sel('MainArea', '#d1')
 	
-	// at-rules
-	.at('fonts', 'font-face') 
+	// ats
+	.at('PrintedPage', 'media', 'print')
+	.at('MyAnimation', 'keyframes', 'sunrise')
+	.at('UTF8Chars', 'charset', 'UTF-8')
 	
-	// apply styles
-	.apply(this.sel.Everywhere, [
+	// write styles
+	.write(this.at.UTF8Chars)
+	.write(this.sel.Everywhere, [
 		this.styles.basic,	// using named styles
-		this.styles.basic2,	
-		this.style([		// using in-place style declaration			
-			this.decl('text-align', 'right'),
-			this.decl('letter-spacing', 5, 'px')
-		])
+		this.styles.basic2
 	])
+
+	.write(this.sel.MainArea, 
+		this.style([		// using in-place style declaration			
+			this.rule('text-align', 'right'),
+			this.rule('letter-spacing', 5, 'px')
+		])
+	)
+
+	.write(this.sel.MainArea, // though adding 2nd time, will be added only once 
+		this.style([			
+			this.rule('color', 'green'),
+		])
+	)
+	
+	.write(this.at.PrintedPage, {
+		'MainArea': [this.styles.basic3, this.styles.basic4]		
+	})
+	
+	.write(this.at.MyAnimation, {
+		'0%': this.styles.basic2,
+		'8%': this.style([				
+				this.rule('color', 'magenta')
+			  ]),
+		'50%, 72%': this.style([				
+				this.rule('color', 'yellow')
+			  ])			
+	})
+	
+	.write('/* comments */')
+	.write('@supports (abc) { #d1 { color: red; } }')
 	
 	// done
 	.end(); 

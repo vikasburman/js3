@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.1.2',
+		VERSION: '0.1.3',
 		COPYRIGHT: 'Copyright © 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
@@ -32,32 +32,49 @@
 		var self = this;
 		
 		// generation
-		var stylesPlaceHolder = '$TYLE$';	
-		var allItems = [];
-		var id = '';
-		var isLoaded = false;
-		var xref = false;
-		var isDirty = false;
-		var isDone = false;
-		var isLoadAfterDone = false;
-		var isEnd = false;
-		var selectorScopes = [];
+		var stylesPlaceHolder = '$STYLES$',
+			selsPlaceHolder = '$SELS$',
+			atRuleQueryOrValuePlaceHolder = '$VALUE$',
+			invalidArgument = 'invalid argument',
+			alreadyDefined = ' already defined',
+			notSupported = ' cannot be applied',
+			allItems = [], // {type: 'at'|'sel'|'decl', item: atObject|selObject|declaration}
+			id = '',
+			isLoaded = false,
+			xref = false,
+			isDirty = false,
+			isDone = false,
+			isLoadAfterDone = false,
+			isEnd = false,
+			selectorScopes = [];
 		var valueTypes = {
 			vars: 'variable',
-			decl: 'declaration',
+			rule: 'rule',
 			style: 'style',
 			sel: 'selector',
-			at: 'at-rule'
-		};			
+			at: 'at',
+			decl: 'decl'
+		};
+		var atRules = {
+			cs: 'charset',
+			doc: 'document',
+			ff: 'font-face',
+			imp: 'import',
+			med: 'media',
+			ns: 'namespace',
+			pg: 'page',
+			kf: 'keyframes',
+			sup: 'supports'		
+		};
 		var randomName = function() { 
 			var S4 = function() { return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1); };
 			return ("_" + S4() + S4() + '_' + S4() + '_' + S4() + '_' + S4() + '_' + S4() + S4() + S4());		
 		};
 		var getNewId = function() { return 'js3_' + fileName + randomName(); };
 		var generateStyles = function(styles) {
-			var allStyles = '';
-			var style = null;		
-			var index = 0;			
+			var allStyles = '',
+				style = null,		
+				index = 0;			
 			for (index = 0; index < styles.length; ++index) {
 				style = styles[index];
 				allStyles += ' ' + style.apply(self);
@@ -65,33 +82,80 @@
 			return allStyles;
 		};
 		var generateCSS = function() {
-			var css = '';
-			var item = null;
-			var applyTo = '';
-			var itemCss = '';
-			var scopedItemCss = '';
-			var styles = '';
-			var index = 0;
-			var index2 = 0;
-			var scope = '';
+			var css = '',
+				item = null,
+				at = null,
+				sel = null,
+				itemCss = '',
+				sels = null,
+				styles = '',
+				index = 0,
+				selName = '',
+				selBody = '',
+				atBody = '',
+				index2 = 0,
+				index3 = 0,
+				scope = '';
 			for (index = 0; index < allItems.length; ++index) {
 				item = allItems[index];
-				applyTo = item.applyTo();
-				styles = applyTo.replace(stylesPlaceHolder, generateStyles(item.styles)) ;
-				if (item.applyTo.type() === valueTypes.sel &&
-					item.applyTo.raw.canBeScoped() && 
-					self.parent.settings.isConsiderScopes && 
-					selectorScopes.length > 0) {
-					for (index2 = 0; index2 < selectorScopes.length; ++index2) {
-						scope = selectorScopes[index2];
-						scopedItemCss += (scope + ' ' + styles);
-					}
-					itemCss = scopedItemCss;	
-				} else {
-					itemCss = styles;
+				itemCss = '';
+				switch(item.type) {
+					case valueTypes.sel:
+						sel = item.item;
+						selBody = sel.apply(self);
+						styles = selBody.replace(stylesPlaceHolder, generateStyles(sel.styles()));
+						// add scopes, if required
+						if (sel.raw.canBeScoped() && 
+							self.parent.settings.isConsiderScopes && 
+							selectorScopes.length > 0) {
+							for (index2 = 0; index2 < selectorScopes.length; ++index2) {
+								scope = selectorScopes[index2];
+								styles += (scope + ' ' + styles);
+							}
+						}
+						itemCss = styles;
+						break;
+					case valueTypes.at:
+						at = item.item;
+						atBody = at.apply(self);
+						if (at.raw.canEmbedSels()) {
+							styles = '';
+							selName = '';
+							sels = at.sels.apply(self);
+							for (index2 = 0; index2 < sels.length; ++index2) {
+								selName = sels[index2];
+								if (at.raw.hasSpecialSelectors()) {
+									sel = null;
+									selBody = selName + ' {' + stylesPlaceHolder + '}';
+									styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
+								} else {
+									sel = self.sel[selName];
+									selBody = sel();
+									styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
+									// add scopes, if required
+									if (sel.raw.canBeScoped() && 
+										self.parent.settings.isConsiderScopes && 
+										selectorScopes.length > 0) {
+										for (index3 = 0; index3 < selectorScopes.length; ++index3) {
+											scope = selectorScopes[index3];
+											styles += (scope + ' ' + styles);
+										}
+									}									
+								}
+							}
+							itemCss = atBody.replace(selsPlaceHolder, styles);
+						} else {
+							itemCss = atBody;
+						}
+						break;
+					case valueTypes.decl:
+						itemCss = (typeof item.item === 'string' ? item.item : item.item.apply(self));
+						break;
+					default:
+						throw item.item.fName() + notSupported;
 				}
 				css += ' ' + itemCss;
-			}	
+			}
 			return css;
 		};		
 		var loadCSS = function() {
@@ -122,11 +186,22 @@
 				// reset flags
 				id = '';
 				isLoaded = false;
-				isDirty = false;
+				isDirty = true;
 			}	
 		};
 		
 		// definition
+		var atRuleTemplates = {
+			'charset': '@charset "' + atRuleQueryOrValuePlaceHolder + '";',
+			'font-face': '@font-face {' + selsPlaceHolder + '}',
+			'import': '@import ' + atRuleQueryOrValuePlaceHolder + ';',
+			'namespace': '@namespace ' + atRuleQueryOrValuePlaceHolder + ';',
+			'page': '@page ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'media': '@media ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'document': '@document ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'keyframes': '@keyframes ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'supports': '@supports ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}'
+		};
 		var stylesAdded = function(count, type, to) {
 			isDirty = true;
 			if (isLoaded && self.parent.settings.isLogChanges) {
@@ -256,73 +331,73 @@
 			getValue.last.valueSuffixOrFuncOrNone = valueSuffixOrFuncOrNone;
 			return getValue;
 		};
-		var styleValueWrapperFunc = function(declArrayOrDeclArrayFuncOrCondFunc, declArrayOrDeclLiteral) {
+		var styleValueWrapperFunc = function(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral) {
 			var getValue = function() { return []; };
 			var getAsArray = function(value) { 
 				if (!value) { value = []; }
 				if (!isArray(value)) { value = [value]; }
 				return value;
 			};
-			if (declArrayOrDeclArrayFuncOrCondFunc) {
-				if (isFunction(declArrayOrDeclArrayFuncOrCondFunc)) {
-					if (declArrayOrDeclLiteral) {
-						if (isArray(declArrayOrDeclLiteral)) {
+			if (ruleArrayOrRuleArrayFuncOrCondFunc) {
+				if (isFunction(ruleArrayOrRuleArrayFuncOrCondFunc)) {
+					if (ruleArrayOrRuleLiteral) {
+						if (isArray(ruleArrayOrRuleLiteral)) {
 							// this is styles collection in an array
 							getValue = function() {
 								var value = [];
-								var valueIndex = declArrayOrDeclArrayFuncOrCondFunc.apply(self);
-								if (valueIndex <= declArrayOrDeclLiteral.length) {
-									value = getAsArray(declArrayOrDeclLiteral[valueIndex]);
+								var valueIndex = ruleArrayOrRuleArrayFuncOrCondFunc.apply(self);
+								if (valueIndex <= ruleArrayOrRuleLiteral.length) {
+									value = getAsArray(ruleArrayOrRuleLiteral[valueIndex]);
 								}
 								return value;
 							};
-						} else if (isLiteral(declArrayOrDeclLiteral)) {
+						} else if (isLiteral(ruleArrayOrRuleLiteral)) {
 							// this is styles collection in a literal
 							getValue = function() {
 								var value = [];
-								var valueKey = declArrayOrDeclArrayFuncOrCondFunc.apply(self);
-								if (declArrayOrDeclLiteral[valueKey]) {
-									value = getAsArray(declArrayOrDeclLiteral[valueKey]);
+								var valueKey = ruleArrayOrRuleArrayFuncOrCondFunc.apply(self);
+								if (ruleArrayOrRuleLiteral[valueKey]) {
+									value = getAsArray(ruleArrayOrRuleLiteral[valueKey]);
 								}
 								return value;
 							};						
 						} else {
 							// this is an invalid argument
-							throw 'invalid argument';
+							throw invalidArgument;
 						}
 					} else {
-						if (isFunction(declArrayOrDeclArrayFuncOrCondFunc.type) && 
-							declArrayOrDeclArrayFuncOrCondFunc.type() === valueTypes.decl) {
-							// this is single declaration
+						if (isFunction(ruleArrayOrRuleArrayFuncOrCondFunc.type) && 
+							ruleArrayOrRuleArrayFuncOrCondFunc.type() === valueTypes.rule) {
+							// this is single rule
 							getValue = function() {
-								var value = getAsArray(declArrayOrDeclArrayFuncOrCondFunc);
+								var value = getAsArray(ruleArrayOrRuleArrayFuncOrCondFunc);
 								return value;
 							};						
 						} else {
 							// this is a custom function
 							getValue = function() {
-								var value = getAsArray(declArrayOrDeclArrayFuncOrCondFunc.apply(self));
+								var value = getAsArray(ruleArrayOrRuleArrayFuncOrCondFunc.apply(self));
 								return value;
 							};
 						}
 					}
 				} else {
-					if (isArray(declArrayOrDeclArrayFuncOrCondFunc)) {
-						// this is a declarations array
+					if (isArray(ruleArrayOrRuleArrayFuncOrCondFunc)) {
+						// this is a rules array
 						getValue = function() {
-							var value = declArrayOrDeclArrayFuncOrCondFunc;
+							var value = ruleArrayOrRuleArrayFuncOrCondFunc;
 							return value;
 						};
 					} else {
 						// this is an invalid argument
-						throw 'invalid argument';
+						throw invalidArgument;
 					}
 				}
 			}
 			getValue.plain = function() { return getValue(); };
 			getValue.last = {};
-			getValue.last.declArrayOrDeclArrayFuncOrCondFunc = declArrayOrDeclArrayFuncOrCondFunc;
-			getValue.last.declArrayOrDeclLiteral = declArrayOrDeclLiteral;
+			getValue.last.ruleArrayOrRuleArrayFuncOrCondFunc = ruleArrayOrRuleArrayFuncOrCondFunc;
+			getValue.last.ruleArrayOrRuleLiteral = ruleArrayOrRuleLiteral;
 			return getValue;
 		};		
 		var selValueWrapperFunc = function(selectorOrFunc) {
@@ -350,7 +425,7 @@
 		};		
 		var atValueWrapperFunc = function(atRuleQueryOrIdentifierOrFunc) {
 			var getValue = function() { return ''; };
-			if (arguments.lenhth > 0) {
+			if (arguments.length > 0) {
 				if (isFunction(atRuleQueryOrIdentifierOrFunc)) {
 					// this is a function
 					getValue = function() {
@@ -377,33 +452,37 @@
 				}
 				return varValueWrapper();
 			};
+			var varId = randomName();
+			wrapper.id = function() { return varId; };				
 			wrapper.type = function() { return valueTypes.vars; };
+			wrapper.fName = function() { return varName; };
 			wrapper.raw = {};
-			wrapper.raw.name = function() { return varName; };
 			wrapper.raw.value = function() { return varValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
-			self.parent.ex.me(self, wrapper, wrapper.type(), wrapper.raw.type(), wrapper.raw.name());
+			self.parent.ex.me(self, wrapper, valueTypes.vars, wrapper.raw.type(), '');
 			return wrapper;
 		};
-		var declWrapper = function(name, propName, propValueWrapper) {
-			var getDeclaration = function(propValue) {
+		var ruleWrapper = function(ruleName, propName, propValueWrapper) {
+			var getRule = function(propValue) {
 				if (propValue) { propValue = propValue.toString(); }
 				if (propValue.substr(propValue.length - 1 !== ';')) { propValue += ';'; }
 				return propName + ':' + propValue;
 			};
 			var wrapper = function(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
 				if (arguments.length > 0) { 
-					var oldValue = getDeclaration(propValueWrapper()); 
+					var oldValue = getRule(propValueWrapper()); 
 					if (!valueSuffixOrValueArrayOrValueLiteral) { valueSuffixOrValueArrayOrValueLiteral = propValueWrapper.last.valueSuffixOrValueArrayOrValueLiteral; }
 					if (!valueSuffixOrFuncOrNone) { valueSuffixOrFuncOrNone = propValueWrapper.last.valueSuffixOrFuncOrNone; }
 					propValueWrapper = propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone);
-					valueChanged(valueTypes.decl, name, oldValue, getDeclaration(propValueWrapper())); 
+					valueChanged(valueTypes.rule, ruleName, oldValue, getRule(propValueWrapper())); 
 				}
-				return getDeclaration(propValueWrapper());
+				return getRule(propValueWrapper());
 			};
-			wrapper.type = function() { return valueTypes.decl; };
+			var ruleId = randomName();
+			wrapper.id = function() { return ruleId; };			
+			wrapper.type = function() { return valueTypes.rule; };
+			wrapper.fName = function() { return ruleName; };
 			wrapper.raw = {};
-			wrapper.raw.name = function() { return name; };
 			wrapper.raw.property = function() { return propName; };
 			wrapper.raw.value = function() { return propValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
@@ -412,7 +491,7 @@
 				var justValue = wrapper.prop.value();
 				return fullValue.replace(justValue, '');
 			};
-			self.parent.ex.me(self, wrapper, wrapper.type(), wrapper.raw.type(), wrapper.raw.property());
+			self.parent.ex.me(self, wrapper, valueTypes.rule, wrapper.raw.type(), propName);
 			return wrapper;
 		};
 		var styleWrapper = function(styleName, styleValueWrapper) {
@@ -426,53 +505,66 @@
 				}
 				return theStyles;
 			};				
-			var wrapper = function(declArrayOrDeclArrayFuncOrCondFunc, declArrayOrDeclLiteral) {
+			var wrapper = function(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral) {
 				if (arguments.length > 0) { 
 					var oldValue = getStyles(styleValueWrapper()); 
-					if (!declArrayOrDeclLiteral) { declArrayOrDeclLiteral = styleValueWrapper.last.declArrayOrDeclLiteral; }
-					styleValueWrapper = styleValueWrapperFunc(declArrayOrDeclArrayFuncOrCondFunc, declArrayOrDeclLiteral);
+					if (!ruleArrayOrRuleLiteral) { ruleArrayOrRuleLiteral = styleValueWrapper.last.ruleArrayOrRuleLiteral; }
+					styleValueWrapper = styleValueWrapperFunc(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral);
 					valueChanged(valueTypes.style, styleName, oldValue, getStyles(styleValueWrapper())); 
 				}
 				return getStyles(styleValueWrapper());
 			};
+			var styleId = randomName();
+			wrapper.id = function() { return styleId; };
 			wrapper.type = function() { return valueTypes.style; };
-			wrapper.attach = function(selsOrAts) { self.attach(self.styles[styleName], selsOrAts); };
-			wrapper.detach = function(selsOrAts) { self.detach(self.styles[styleName], selsOrAts); };
-			wrapper.add = function(declArray, isInsertOnTop) {
-				var processedDeclArray = styleValueWrapper.plain();
-				processedDeclArray = (isArray(processedDeclArray) ? processedDeclArray.slice(0) : [processedDeclArray]);
-				declArray = (isArray(declArray) ? declArray : [declArray]);
+			wrapper.fName = function() { return styleName; };
+			wrapper.rules = function() { return styleValueWrapper.plain(); };
+			wrapper.rules.add = function(newRules, isInsertOnTop) {
+				var processedRuleArray = styleValueWrapper.plain();
+				processedRuleArray = (isArray(processedRuleArray) ? processedRuleArray.slice(0) : [processedRuleArray]);
+				newRules = (isArray(newRules) ? newRules : [newRules]);
 				if (isInsertOnTop) { 
-					processedDeclArray = declArray.concat(processedDeclArray);
+					processedRuleArray = newRules.concat(processedRuleArray);
 				} else {
-					processedDeclArray = processedDeclArray.concat(declArray);
+					processedRuleArray = processedRuleArray.concat(newRules);
 				}
-				wrapper(processedDeclArray); // update it
+				wrapper(processedRuleArray); // update it
 			};
-			wrapper.remove = function(namedDecl) {
-				var processedDeclArray = styleValueWrapper.plain();
-				processedDeclArray = (isArray(processedDeclArray) ? processedDeclArray.slice(0) : [processedDeclArray]);
-				if (!isFunction(namedDecl.type) && namedDecl.type() !== valueTypes.decl) { throw 'invalid argument'; }
+			wrapper.rules.remove = function(rule) {
+				var processedRuleArray = styleValueWrapper.plain();
+				processedRuleArray = (isArray(processedRuleArray) ? processedRuleArray.slice(0) : [processedRuleArray]);
 				var index = 0;
-				var decl = null;
-				var namedDeclName = namedDecl.raw.name();
+				var item = null;
+				var ruleId = rule.id();
 				var foundAt = -1;
-				for (index = 0; index < processedDeclArray.length; ++index) {
-					decl = processedDeclArray[index];
-					if (decl.raw.name() === namedDeclName) {
-						foundAt = index;
-						break;
+				var isRemoved = false;
+				while(true) {
+					foundAt = -1;
+					for (index = 0; index < processedRuleArray.length; ++index) {
+						item = processedRuleArray[index];
+						if (item.id() === ruleId) {
+							foundAt = index;
+							break;
+						}
+					}
+					if (foundAt !== -1) {
+						processedRuleArray.splice(foundAt, 1); // remove it
+						isRemoved = true;
+					} else {
+						break; // all instances of this rule is removed
 					}
 				}
-				if (foundAt !== -1) {
-					processedDeclArray.splice(foundAt, 1); // remove it
+				if (isRemoved) {
+					wrapper(processedRuleArray); // update it
 				}
-				wrapper(processedDeclArray); // update it			
+			};
+			wrapper.rules.remove.all = function() {
+				wrapper([]); // update it
 			};
 			wrapper.raw = {};
-			wrapper.raw.name = function() { return styleName; };
 			wrapper.raw.value = function() { return styleValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
+			self.parent.ex.me(self, wrapper, valueTypes.style, '', '');
 			return wrapper;			
 		};
 		var selWrapper = function(selName, canBeScoped, selValueWrapper) {
@@ -485,38 +577,167 @@
 				}
 				return selValueWrapper();
 			};
+			var selId = randomName();
+			var styles = [];
+			wrapper.id = function() { return selId; };
 			wrapper.type = function() { return valueTypes.sel; };
-			wrapper.apply = function(styles) { self.apply(self.sel[selName], styles); };
-			wrapper.clear = function(namedStyle) { self.clear(self.sel[selName], namedStyle); };
+			wrapper.fName = function() { return selName; };
+			wrapper.styles = function() { return styles; };
+			wrapper.styles.value = function() { return generateStyles(wrapper.styles()); };
+			wrapper.styles.add = function(newStyles) {
+				newStyles = (isArray(newStyles) ? newStyles : [newStyles]);
+				styles = styles.concat(newStyles);
+				stylesAdded(newStyles.length, valueTypes.sel, selName);			
+			};
+			wrapper.styles.remove = function(style) {
+				var index = 0;
+				var styleId = style.id();
+				var styleName = style.fName();
+				var foundAt = -1;
+				var isRemoved = false;
+				while (true) {
+					foundAt = -1;
+					for (index = 0; index < styles.length; ++index) {
+						if (styles[index].id() === styleId) {
+							foundAt = index; 
+							break;
+						}
+					}
+					if (foundAt !== -1) {
+						styles.splice(foundAt, 1); // remove this
+						isRemoved = true;
+					} else {
+						break; // all instances of given style are removed
+					}
+				}
+				if (isRemoved) {
+					styleRemoved(styleName, valueTypes.sel, selName);
+				}
+			};
+			wrapper.styles.remove.all = function() { 
+				styles.length = 0; 
+				styleRemoved('All styles', valueTypes.sel, selName);
+			};
 			wrapper.raw = {};
-			wrapper.raw.name = function() { return selName; };
 			wrapper.raw.canBeScoped = function() { return canBeScoped; };
 			wrapper.raw.value = function() { return selValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
+			self.parent.ex.me(self, wrapper, valueTypes.sel, '', '');
 			return wrapper;	
 		};
 		var atWrapper = function(atName, atRule, atValueWrapper) {
-			var atRuleDeclaration = function() {
-				return '@' + atRule + ' {' + stylesPlaceHolder + '}';
+			var template = atRuleTemplates[atRule.toLowerCase()];
+			if (!template) { throw invalidArgument; }
+			var canEmbedSels = (template.indexOf(selsPlaceHolder) !== -1);
+			var atRuleRulearation = function(atRuleQueryOrValue) {
+				atRuleQueryOrValue = atRuleQueryOrValue || ''; 
+				return template.replace(atRuleQueryOrValuePlaceHolder, atRuleQueryOrValue);
 			};
 			var wrapper = function(newAtRuleQueryOrIdentifierOrFunc) {
 				if (newAtRuleQueryOrIdentifierOrFunc) { 
-					var oldValue = atRuleDeclaration(atValueWrapper()); 
+					var oldValue = atRuleRulearation(atValueWrapper()); 
 					atValueWrapper = atValueWrapperFunc(newAtRuleQueryOrIdentifierOrFunc); 
-					valueChanged(valueTypes.at, atName, oldValue, atRuleDeclaration(atValueWrapper())); 
+					valueChanged(valueTypes.at, atName, oldValue, atRuleRulearation(atValueWrapper())); 
 				}
-				return atRuleDeclaration(atValueWrapper());
+				return atRuleRulearation(atValueWrapper());
 			};
+			var atId = randomName();
+			var groupedStyles = {};
+			wrapper.id = function() { return atId; };
 			wrapper.type = function() { return valueTypes.at; };
-			wrapper.apply = function(styles) { self.apply(self.at[atName], styles); };
-			wrapper.clear = function(namedStyle) { self.clear(self.at[atName], namedStyle); };		
+			wrapper.fName = function() { return atName; };
+			if (canEmbedSels) {
+				wrapper.sels = function() { 
+					var sels = [];
+					var selName = '';
+					for (selName in groupedStyles) {
+						if (groupedStyles.hasOwnProperty(selName)) { sels.push(selName); }
+					}
+					return sels;
+				};
+				wrapper.sels.define = function(newGroupedStyles) {
+					groupedStyles = newGroupedStyles;
+					stylesAdded('New selectors and styles', valueTypes.at, atName);
+				};
+				wrapper.sels.add = function(selOrSelName, styles) { 
+					var selName = (typeof selOrSelName === 'string' ? selOrSelName : selOrSelName.fName());
+					if (!groupedStyles[selName]) {
+						groupedStyles[selName] = styles;
+					} else {
+						groupedStyles[selName] = groupedStyles[selName].concat(styles); // add more
+					}
+					stylesAdded(styles.length, valueTypes.sel, selName + ' (under ' + atName + ')');	
+				};	
+				wrapper.sels.remove = function(selOrSelName, style) { 
+					var selName = (typeof selOrSelName === 'string' ? selOrSelName : selOrSelName.fName());
+					if (groupedStyles[selName]) {
+						var index = 0;
+						var styles = (isArray(groupedStyles[selName]) ? groupedStyles[selName] : []);
+						if (styles.length > 0) {
+							var styleName = style.fName();
+							var foundAt = -1;
+							var isRemoved = false;
+							while (true) {
+								foundAt = -1;
+								for (index = 0; index < styles.length; ++index) {
+									if (styles[index].fName() === styleName) {
+										foundAt = index; 
+										break;
+									}
+								}
+								if (foundAt !== -1) {
+									styles.splice(foundAt, 1); // remove this
+									isRemoved = true;
+								} else {
+									break; // all instances of given style are removed
+								}
+							}
+							if (isRemoved) {
+								groupedStyles[selName] = styles; // update
+								styleRemoved(styleName, valueTypes.sel, selName + ' (under ' + atName + ')');
+							}	
+						}
+					}
+				};	
+				wrapper.sels.remove.all = function() { 
+					groupedStyles = {};
+					styleRemoved('All styles', valueTypes.at, atName);
+				};					
+				wrapper.styles = function(selName) { 
+					var styles = [];
+					if (groupedStyles[selName]) { styles = groupedStyles[selName]; }
+					return (isArray(styles) ? styles : [styles]);
+				};	
+				wrapper.styles.value = function(selName) { return generateStyles(wrapper.styles(selName)); };
+				wrapper.styles.add = function(selOrSelName, styles) { 
+					return wrapper.sels.add(selOrSelName, styles);
+				};	
+				wrapper.styles.remove = function(selOrSelName, style) { 
+					return wrapper.sels.remove(selOrSelName, style);
+				};	
+				wrapper.styles.remove.all = function(selOrSelName) { 
+					var selName = (typeof selOrSelName === 'string' ? selOrSelName : selOrSelName.id());
+					if (!selName) { 
+						wrapper.sels.remove.all(); 
+					} else {
+						if (groupedStyles[selName]) {
+							groupedStyles[selName] = [];
+							styleRemoved('All styles', valueTypes.sel, selName + ' (under ' + atName + ')');
+						}
+					}
+				};				
+			}
 			wrapper.raw = {};
-			wrapper.raw.name = function() { return atName; };
 			wrapper.raw.rule = function() { return atRule; };
+			wrapper.raw.canEmbedSels = function() { return canEmbedSels; };
+			wrapper.raw.hasSpecialSelectors = function() { return (atRule === atRules.kf); };
 			wrapper.raw.value = function() { return atValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
+			self.parent.ex.me(self, wrapper, valueTypes.at, '', atRule);
 			return wrapper;			
 		};
+		
+		// definitions
 		self.xref = function() {
 			if (arguments.length > 0) { 
 				self.parent.xref(fileName, Array.prototype.slice.call(arguments, 0)); 
@@ -524,23 +745,23 @@
 			}
 			return self;
 		};
-		self.decl = function(propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
-			return declWrapper(randomName(), propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone));
+		self.rule = function(propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
+			return ruleWrapper(randomName(), propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone));
 		};
-		self.style = function(declArrayOrDeclArrayFuncOrCondFunc, declArrayOrDeclLiteral) {
-			return styleWrapper(randomName(), styleValueWrapperFunc(declArrayOrDeclArrayFuncOrCondFunc, declArrayOrDeclLiteral));
+		self.style = function(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral) {
+			return styleWrapper(randomName(), styleValueWrapperFunc(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral));
 		};	
 		self.vars = function(para1, para2) {
 			if (arguments.length === 2) {
 				// name, value
-				if (self.vars[para1]) { throw 'Variable "' + para1 + '" already defined.'; }
+				if (self.vars[para1]) { throw para1 + alreadyDefined; }
 				self.vars[para1] = varWrapper(para1, varValueWrapperFunc(para2));
 			} else if (isLiteral(para1)) {
 				// { key1: value1, key2: value3, ... }
 				var property = null;
 				for (property in para1) {
 					if (para1.hasOwnProperty(property)) {
-						if (self.vars[property]) { throw 'Variable "' + property + '" already defined.'; }
+						if (self.vars[property]) { throw property + alreadyDefined; }
 						self.vars[property] = varWrapper(property, varValueWrapperFunc(para1[property])); 
 					}
 				}
@@ -548,84 +769,54 @@
 			return self;
 		};
 		self.sel = function(name, selectorOrFunc, canBeScoped) {
-			if (name) { self.sel[name] = selWrapper(name, canBeScoped, selValueWrapperFunc(selectorOrFunc)); }
+			if (self.sel[name]) { throw name + alreadyDefined; }
+			self.sel[name] = selWrapper(name, canBeScoped, selValueWrapperFunc(selectorOrFunc));
 			return self;
 		};		
-		self.at = function(name, atRule, atRuleQueryOrIdentifierOrFunc) {
-			if (name) { self.at[name] = atWrapper(name, atRule, atValueWrapperFunc(atRuleQueryOrIdentifierOrFunc)); }
-			return self;
-		};		
-		self.decls = function(name, propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
-			if (name) { self.decls[name] = declWrapper(name, propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone)); }
+		self.rules = function(name, propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
+			if (self.rules[name]) { throw name + alreadyDefined; }
+			self.rules[name] = ruleWrapper(name, propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone)); 
 			return self;
 		};	
-		self.styles = function(name, declArrayOrDeclArrayFuncOrCondFunc, declArrayOrDeclLiteral) {
-			if (name) { self.styles[name] = styleWrapper(name, styleValueWrapperFunc(declArrayOrDeclArrayFuncOrCondFunc, declArrayOrDeclLiteral)); }
+		self.styles = function(name, ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral) {
+			if (self.styles[name]) { throw name + alreadyDefined; }		
+			self.styles[name] = styleWrapper(name, styleValueWrapperFunc(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral));
 			return self;
 		};
-		self.apply = function(applyTo, styles) {
-			styles = (isArray(styles) ? styles : [styles]);
-			if (!isFunction(applyTo.type)) { throw 'invalid argument'; }
-			var applyToType = applyTo.type();
-			if ([valueTypes.sel, valueTypes.at].indexOf(applyToType) === -1) { throw 'invalid argument'; }		
-			allItems.push({applyTo: applyTo, styles: styles});
-			stylesAdded(styles.length, applyToType, applyTo.raw.name());
-			return self;
+		self.at = function(name, atRule, valueOrQueryOrStylesOrNone) {
+			if (self.at[name]) { throw name + alreadyDefined; }
+			var valueOrQuery = valueOrQueryOrStylesOrNone || '';
+			self.at[name] = atWrapper(name, atRule, atValueWrapperFunc(valueOrQuery)); 
+			return self;			
 		};
-		self.clear = function(clearFrom, namedStyle) {
-			if (!isFunction(clearFrom.type) || !isFunction(namedStyle.type)) { throw 'invalid argument'; }
-			if (namedStyle.type() !== valueTypes.style) { throw 'invalid argument'; }
-			var clearFromType = clearFrom.type();
-			if ([valueTypes.sel, valueTypes.at].indexOf(clearFromType) === -1) { throw 'invalid argument'; }
-			var clearFromName = clearFrom.raw.name();
-			var index = 0;
-			var index2 = 0;
-			var item = null;
-			var foundAt = -1;
-			for (index = 0; index < allItems.length; ++index) {
-				item = allItems[index];
-				if (item.applyTo.type() === clearFromType && item.applyTo.raw.name() === clearFromName) {
-					foundAt = -1;
-					for (index2 = 0; index2 < item.styles.length; ++index2) {
-						if (item.styles[index2].raw.name() === namedStyle.raw.name()) {
-							foundAt = index2; 
-							break;
-						}
-					}
-					if (foundAt !== -1) {
-						item.styles.splice(foundAt, 1); // remove this
-						styleRemoved(namedStyle.raw.name(), clearFromType, clearFromName);
-					}
-				}
-			}		
-			return self;
-		};
-		self.attach = function(style, selsOrAts) {
-			selsOrAts = (isArray(selsOrAts) ? selsOrAts : [selsOrAts]);
-			var index = 0;
-			var selOrAt = null;
-			var selOrAtType = '';
-			for (index = 0; index < selsOrAts.length; ++index) {
-				selOrAt = selsOrAts[index];
-				if (!isFunction(selOrAt.type)) { throw 'invalid argument'; }
-				selOrAtType = selOrAt.type();
-				if ([valueTypes.sel, valueTypes.at].indexOf(selOrAtType) === -1) { throw 'invalid argument'; }				
-				self.apply(selOrAt, style);
+		
+		// append in style sheet
+		self.write = function(selOrAtOrDeclStringOrFunc, StylesOrGroupedStylesOrNone) {
+			var targetType = '';
+			if (typeof selOrAtOrDeclStringOrFunc === 'string' || (isFunction(selOrAtOrDeclStringOrFunc) && !selOrAtOrDeclStringOrFunc.type)) {
+				targetType = valueTypes.decl;
+			} else {
+				targetType = selOrAtOrDeclStringOrFunc.type();
 			}
+			switch(targetType) {
+				case valueTypes.sel:
+					allItems.push({type: valueTypes.sel, item:selOrAtOrDeclStringOrFunc});
+					selOrAtOrDeclStringOrFunc.styles.add(StylesOrGroupedStylesOrNone);
+					break;
+				case valueTypes.at:
+					allItems.push({type: valueTypes.at, item:selOrAtOrDeclStringOrFunc});
+					if (selOrAtOrDeclStringOrFunc.raw.canEmbedSels()) {
+						selOrAtOrDeclStringOrFunc.sels.define(StylesOrGroupedStylesOrNone);
+					}
+					break;
+				case valueTypes.decl:
+					allItems.push({type: valueTypes.decl, item:selOrAtOrDeclStringOrFunc});
+					break;
+				default:
+					throw invalidArgument;
+			}
+			return self;
 		};
-		self.detach = function(style, selsOrAts) {
-			selsOrAts = (isArray(selsOrAts) ? selsOrAts : [selsOrAts]);
-			var index = 0;
-			var selOrAt = null;
-			var selOrAtType = '';
-			for (index = 0; index < selsOrAts.length; ++index) {
-				selOrAt = selsOrAts[index];
-				if (!isFunction(selOrAt.type)) { throw 'invalid argument'; }
-				selOrAtType = selOrAt.type();
-				if ([valueTypes.sel, valueTypes.at].indexOf(selOrAtType) === -1) { throw 'invalid argument'; }				
-				self.clear(selOrAt, style);
-			}		
-		};		
 		
 		// either end or (done first and load later will be used)
 		self.done = function() {
@@ -659,8 +850,8 @@
 		self.id = function() { return id; };
 		self.isChanged = function() { return isDirty; };
 		self.name = function() { return fileName; };
-		self.reload = function() { 
-			if ((isDirty && !isDone) || (isDirty && isDone && isLoadAfterDone)) { 
+		self.reload = function(isForceReload) { 
+			if ((((isDirty && !isDone) || (isDirty && isDone && isLoadAfterDone)) && !self.parent.state.isUpdatesSuspended) || isForceReload) { 
 				loadCSS(); 
 				if (xref) { self.parent.reload.dependents(fileName); }
 			}
@@ -693,12 +884,16 @@
 		core.settings = {};
 		core.settings.isLogChanges = true;
 		core.settings.isLoadExtensions = true;
-		core.settings.isReloadOnChange = false;
+		core.settings.isReloadOnChange = true;
 		core.settings.isConsiderScopes = true;
 		
+		// state
+		core.state = {};
+		core.state.isUpdatesSuspended = false;
+		
 		// files
-		var allFiles = [];
-		var xref = {};
+		var allFiles = [],
+			xref = {};
 		core.all = function() { return allFiles; };
 		core.xref = function(inFile, otherFilesArray) {
 			var otherFiles = (xref[inFile] || []);
@@ -741,16 +936,14 @@
 		core.ex = function(exName, targetValueTypes, targetValueDataType, targetType, classFunc) {
 			if (!core.settings.isLoadExtensions) { return; }
 			// add if not already added
-			if (!exName) { throw 'invalid argument'; }
-			if (!targetValueTypes) { throw 'invalid argument'; }
 			if (!targetValueDataType) { targetValueDataType = ''; }
 			if (targetValueDataType === '*') { targetValueDataType = ''; }
 			if (!targetType) { targetType = ''; }
 			if (targetType === '*') { targetType = ''; }
 			targetValueTypes = (isArray(targetValueTypes) ? targetValueTypes : [targetValueTypes]);
-			var index = 0;
-			var targetValueType = '';
-			var fullName = '';
+			var index = 0,
+				targetValueType = '',
+				fullName = '';
 			for (index = 0; index < targetValueTypes.length; ++index) {
 				targetValueType = targetValueTypes[index];
 				fullName = '_' + targetValueType + '_' + targetValueDataType + '_' + targetType + '_' + exName;
@@ -759,8 +952,8 @@
 			}			
 		};
 		core.ex.me = function(css, wrapper, valueObjectType, valueObjectDataType, valueType) {
-			var ex = null;
-			var property = null;
+			var ex = null,
+				property = null;
 			wrapper.parent = wrapper.parent || css;
 			for (property in allEx) {
 				if (allEx.hasOwnProperty(property)) {
@@ -775,6 +968,13 @@
 		};
 		
 		// changes
+		core.suspendUpdates = function() { 
+			core.state.isUpdatesSuspended = true; 
+		};
+		core.resumeUpdates = function() { 
+			core.state.isUpdatesSuspended = false;
+			core.reload.all(); // without force
+		};
 		core.load = {};
 		core.load.all = function() {
 			var index = 0;
@@ -805,12 +1005,12 @@
 			}
 		};		
 		core.reload = {};
-		core.reload.all = function() {
+		core.reload.all = function(isForceReload) {
 			var index = 0;
 			var css = null;
 			for (index = 0; index < allFiles.length; ++index) {
 				css = allFiles[index];
-				css.reload();
+				css.reload(isForceReload);
 			}			
 		};
 		core.reload.dependents = function(ofFileName) {

@@ -1,7 +1,7 @@
 {
   "name": "JS3",
   "title": "JavaScript Style Sheet",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Vikas Burman <me@vikasburman.com> (http://www.vikasburman.com)",
   "copyright": "Copyright © 2014 Vikas Burman. All rights reserved.",
   "description": "JavaScript Style Sheet - Instead of putting programming in CSS, it puts CSS in a programming language.",
@@ -29,8 +29,9 @@
   },
   "devDependencies": {
     "grunt": "~0.4.2",
-    "grunt-contrib-uglify": "~0.3.2",	
+    "grunt-contrib-uglify": "~0.3.2",
     "grunt-contrib-jshint": "~0.8.0",
-    "grunt-contrib-concat": "~0.3.0"
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-copy": "~0.5.0"
   }
 }
