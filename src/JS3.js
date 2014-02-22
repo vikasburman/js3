@@ -219,7 +219,7 @@
 			}
 			if (isLoaded && self.parent.settings.isReloadOnChange) {
 				self.reload();
-				if (self.parent.settings.isRaiseOnChange) {
+				if (self.parent.state.isChangeHandlersAttached) {
 					self.parent.onChange.raise({css:self, type:'stylesAdded'});
 				}
 			}
@@ -231,7 +231,7 @@
 			}
 			if (isLoaded && self.parent.settings.isReloadOnChange) {
 				self.reload();
-				if (self.parent.settings.isRaiseOnChange) {
+				if (self.parent.state.isChangeHandlersAttached) {
 					self.parent.onChange.raise({css:self, type:'styleRemoved'});
 				}				
 			}			
@@ -243,7 +243,7 @@
 			}
 			if (isLoaded && self.parent.settings.isReloadOnChange) {
 				self.reload();
-				if (self.parent.settings.isRaiseOnChange) {
+				if (self.parent.state.isChangeHandlersAttached) {
 					self.parent.onChange.raise({css:self, type:'valueChanged'});
 				}					
 			}	
@@ -255,6 +255,9 @@
 			}
 			if (isLoaded && self.parent.settings.isReloadOnChange) {
 				self.reload();
+				if (self.parent.state.isChangeHandlersAttached) {
+					self.parent.onChange.raise({css:self, type:'statusChanged'});
+				}				
 			}	
 		};		
 		var varValueWrapperFunc = function(varValueOrFunc) {
@@ -1089,6 +1092,7 @@
 		// state
 		core.state = {};
 		core.state.isUpdatesSuspended = false;
+		core.state.isChangeHandlersAttached = false;
 		
 		// files
 		var allFiles = [],
@@ -1178,6 +1182,7 @@
 				}
 			}
 			if (isFunction(handler)) {
+				core.state.isChangeHandlersAttached = true;
 				if (foundAt === -1) {
 					allHandlers.push({name: handlerName, handler: handler});
 				} else {
@@ -1186,6 +1191,9 @@
 			} else {
 				if (foundAt !== -1) {
 					allHandlers.splice(foundAt, 1); // remove
+				}
+				if (allHandlers.length === 0) {
+					core.state.isChangeHandlersAttached = false;
 				}
 			}
 		};
