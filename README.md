@@ -47,25 +47,27 @@ Include JS3 engine in your html page.
 ```
 You may choose to include `JS3.core.js` instead, if you don't plan to use all extensions which otherwise are bundled into `JS3.min.js` file. When using `JS3.core.js`, you can choose to include individual extensions as per your requirement.
 
-Loading this file will create one global named `JS3` that will serve as anchor for all JS3 operations.
+Loading this file will create one global variable named `JS3`, that will serve as the anchor for all JS3 operations.
 
-**2. Include *.js3 files (your javascript based stylesheet files)**
+**2. Include `*.js3` files (your javascript based stylesheets)**
 
-A `*.js3` file can be seen as a javascript counterpart of a `*.css` file. With JS3, instead of writing `.css` you would be writing `.js3` files, which are pure javascript files.
+A `*.js3` file can be seen as a javascript counterpart of a `*.css` file. With JS3, instead of writing `.css` you would be writing `.js3` files, which are pure javascript files. These can be loaded like any other javascript file (including using any loader such as yepnope).
 
 ```html
 <script type="text/javascript" src="path/styles1.js3"></script>
 <script type="text/javascript" src="path/styles2.js3"></script>
 ```
 
-> Although creating a `.js3` file is recommended for clean code separation, it is possible that you write your stylesheet code directly in any javascript file of yours. No matter how it is loaded these stylesheet objects will be able to see each other and can share style information and be dependent on each other at runtime.
+> Although creating a `.js3` file is recommended for clean code separation, it is possible that you write your stylesheet code directly in any javascript file of yours. 
+
+> No matter how they are defined or loaded, all stylesheet objects will be able to see each other and can share style information at runtime.
 
 That's all is needed to start using the power of JS3.
 
 Create your first `.js3` file
 ---
 
-*A: The empty `.js3` file looks as below. Note this is defining a new CSS object using `JS3.css(<objectName>)` call and passing the resulting new css object as `this` context here:*
+> A: The empty `.js3` file looks as below. Note this is defining a new CSS object using `JS3.css(<objectName>)` call and passing the resulting new css object as `this` context here:
 
 ```javascript
 (function() { 
@@ -75,7 +77,7 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-*B: Define variables that you may want to change at runtime later or that you may want to use across different files:*
+> B: Define variables that you may want to change at runtime later or that you may want to use across different files:
 
 ```javascript
 (function() { 
@@ -86,9 +88,9 @@ Create your first `.js3` file
 
 }.apply(JS3.css('styles1')));
 ```
-> Note the use of `this`. It helps in chaining the calls together.
+**Note the use of `this`. It helps in chaining the calls together.**
 
-*C: Define named style rules that you may want to use in multiple styles or change at runtime later or that you may want to use across different files:*
+> C: Define named style rules that you may want to use in multiple styles or change at runtime later or that you may want to use across different files:
 
 ```javascript
 (function() { 
@@ -103,7 +105,7 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-*D: Define named styles that you may want to apply on multiple selectors or want to change at runtime later or that you may want to use across different files:*
+> D: Define named styles that you may want to apply on multiple selectors or want to change at runtime later or that you may want to use across different files:
 
 ```javascript
 (function() { 
@@ -121,9 +123,9 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-> Note the in-place definition of a rule when defining the style. Not every rule needs to be a named rule when there is limited use. Also note the use of the variable in the style rule.
+**Note the in-place definition of a rule when defining the style. Not every rule needs to be a named rule when there is limited use. Also note the use of the variable in the style rule.**
 
-*E: Define named selectors to identify various regions of your webpage for easy styling. Like everything else, these can also be changed at runtime or can be shared across files:*
+> E: Define named selectors to identify various regions of your webpage for easy styling. Like everything else, these can also be changed at runtime or can be shared across files:
 
 ```javascript
 (function() { 
@@ -139,7 +141,7 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-*F: Define any at-rules. These can also be changed or shared across files:*
+> F: Define any at-rules. These can also be changed or shared across files:
 
 ```javascript
 (function() { 
@@ -153,7 +155,7 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-*G: Once all definitions are done, start building up the stylesheet:*
+> G: Once all definitions are done, start building up the stylesheet:
 
 ```javascript
 (function() { 
@@ -178,9 +180,9 @@ Create your first `.js3` file
 	)
 }.apply(JS3.css('styles1')));
 ```
-> Note, how styles defined once are being reused with multiple selectors. Also note how less used styles can be defined in-place without the need of defining it as named style.
+**Note, how styles defined once are being reused with multiple selectors. Also note how less used styles can be defined in-place without the need of defining it as named style.**
 
-*H: Once everything is done, mark for it:*
+> H: Once everything is done, mark for it:
 
 ```javascript
 (function() { 
@@ -193,7 +195,7 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-*I: Here is how complete `.js3` file looks like:*
+> I: Here is how complete `.js3` file looks like:
 
 ```javascript
 (function() { 
@@ -241,7 +243,7 @@ Create your first `.js3` file
 	.end(); 
 }.apply(JS3.css('styles1')));
 ```
-> Note, everything is plain javascript here.
+**Note, everything is plain javascript here.**
 
 Using the power of JS3
 ---
