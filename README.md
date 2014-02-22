@@ -338,13 +338,6 @@ Release History
 ---
 See the changelog [here](https://github.com/vikasburman/js3/blob/master/CHANGELOG.md).
 
-Contributing to JS3
----
-Community contributions will made JS3 a better specification and framework. If you are interested in contributing, please follow these simple guidelines.
-
-Use [stackoverflow](http://stackoverflow.com/questions/tagged/js3) for questions. [Issues](https://github.com/vikasburman/js3/issues) should be opened if you find a problem or have an enhancement request.
-
-Supply a working sample against the enhancement.
 
 License
 ---
