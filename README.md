@@ -16,6 +16,14 @@ You no longer need to think in terms of having different class for different sce
 
 JS3 can load predefined *.js3 files (comparable to *.css files) or can define a CSS on the fly using pure javascript. 
 
+Power of JS3 comes from following *five* key factors:
+
+* Rich object model built around CSS concepts: selectors, style rules, at-rules, etc. brings in required flexibility and helps in flattening JS3 learning curve
+* Defining styles separately from selectors aids in maximum re-usability
+* Core engine provides utmost control when dealing with multiple stylesheets
+* Extensions helps in bringing domain (i.e., css) specific functionality right at the place of use
+* Scopes helps in loading styles in a shared space without bleeding outside defined boundaries
+
 Features
 ---
 * Pure JavaScript
@@ -36,7 +44,11 @@ Features
 Getting Started
 ---
 
-**1. Include JS3 (the core engine)**
+**1. Install**
+
+Install using `bower install JS3` or download [latest release](https://github.com/vikasburman/js3/releases)
+
+**2. Include**
 
 Include JS3 engine in your html page. 
 
@@ -49,7 +61,7 @@ You may choose to include `JS3.core.js` instead, if you don't plan to use all ex
 
 Loading this file will create one global variable named `JS3`, that will serve as the anchor for all JS3 operations.
 
-**2. Include `*.js3` files (your javascript based stylesheets)**
+**3. Load `*.js3` files**
 
 A `*.js3` file can be seen as a javascript counterpart of a `*.css` file. With JS3, instead of writing `.css` you would be writing `.js3` files, which are pure javascript files. These can be loaded like any other javascript file (including using any loader such as yepnope).
 
@@ -249,16 +261,87 @@ Create your first `.js3` file
 Using the power of JS3
 ---
 
+`JS3` global object provides access to all functionalists as well as all loaded stylesheets. Check out API for complete details. Some quick samples to give you an idea of various possibilities:
 
-Turn off 'allPadding' rule. Note: 'allPadding' is a friendly name that you may have given to a style rule.
-```javascript
-JS3.styles1.styles.allPadding.off();
+> **Change variable's value:** Change will impact all style rules where 'backgroundColor' variable would have been used.
+```
+JS3.styles1.vars.backgroundColor('green');
 ```
 
-Update 'lightBackground' variable's value
-JS3.styles1.vars.lightBackground('yellow'); // will update all styles with new color where 'lightBackground' variable is used
-
-
+> **Turn a style rule off:** Change will impact an update of all styles where this style rule would have been used.
 ```
+JS3.styles1.rules.allPadding.off();
+```
+
+> **Add new style rule:** Change will impact an update of style where this style rule is being added.
+```
+JS3.styles1.styles.basic.rules.add(this.rule('background-color', 'red'));
+```
+
+> **Add new style to a selector:** Change will impact the selector.
+```
+JS3.styles1.sel.MainArea.styles.add(this.style(this.rule('background-color', 'white')));
+```
+
+> **Change selector definition:** Change will impact applying the styles on to this new selector; and removing styles from old selector value.
+```
+JS3.styles1.sel.MainArea('#d3');
+```
+
+> **Across files re-usability:** Access definitions from other files into this file. Remember to cross-reference (using `xref`) to enable cascade updates. In following case, whenever `allPadding2` style or `backgroundColor2` is updated in `styles2` or `styles3` objects respectively, `basic` style here in `styles1` object will also be updated.
+```
+(function() { 
+
+	.xref('styles2', 'styles3')
+	.styles('basic', [
+		JS3.styles2.rules.allPadding2,
+		this.rule('background-color', JS3.styles3.vars.backgroundColor2) 
+	])
+
+}.apply(JS3.css('styles1')));
+```
+
+> **Perform batch changes:** Change will not reflect on DOM until last call in the sequence below.
+```
+JS3.suspendUpdates();
+...
+JS3.styles1.rules.allPadding.off();
+JS3.styles1.sel.MainArea('#d3');
+...
+JS3.resumeUpdates();
+```
+
+> **Remain informed:** Attach event handler and do anything else that is required when something changes anywhere.
+```
+JS3.onChange('myHandler', function(e) {
+
+// e.css holds css object where changes are done
+// e.type holds the type of change
+
+});
+```
+> Possibilities are many. Check out the API to see what all is available.
+
+Examples
+---
+Explore examples given [here](https://github.com/vikasburman/js3/tree/master/examples).
+
+FAQs
+---
+All frequently asked questions are answered here.
+
+API
+---
+Check out the API here.
+
+Release History
+---
+See the changelog [here](https://github.com/vikasburman/js3/blob/master/CHANGELOG.md).
+
+License
+---
+Copyright (C) 2014 Vikas Burman. All rights reserved.
+
+Licensed under the terms of the [MIT license](https://github.com/vikasburman/js3/blob/master/LICENSE.md). You are free to use **JS3** under any open source or commercial project, as long as this copyright header is left intact.
 
 ---
