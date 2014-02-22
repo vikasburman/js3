@@ -1,0 +1,420 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>JS3 by vikasburman</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>JS3</h1>
+        <p>JavaScript Style Sheet - Instead of putting programming in CSS, it puts CSS in a programming language.</p>
+
+        <p class="view"><a href="https://github.com/vikasburman/js3">View the Project on GitHub <small>vikasburman/js3</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/vikasburman/js3/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/vikasburman/js3/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/vikasburman/js3">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="javascript-stylesheet---js3" class="anchor" href="#javascript-stylesheet---js3"><span class="octicon octicon-link"></span></a>JavaScript StyleSheet - JS3</h1>
+
+<blockquote>
+<p>Instead of putting programming in CSS, it puts CSS in a programming language. </p>
+</blockquote>
+
+<h2>
+<a name="introduction" class="anchor" href="#introduction"><span class="octicon octicon-link"></span></a>Introduction</h2>
+
+<p>As more and more development is moving towards client side, different opportunities are opening up and traditional styles of doing everything is undergoing drastic changes. CSS is one such case.</p>
+
+<p>CSSes used to be static style definitions, with pre-processors like LESS and SASS, CSS management becomes much easier. With pre-processors static stylesheets get some life in form of variables, mixins, inheritance, etc. However once processed, they again become static CSS files. All that liveliness remained inside the xxSS execution engine during xxSS processing.</p>
+
+<p>This is where JS3 brings the difference. It creates <em>live</em> CSS with almost zero learning curve as there are <em>NO</em> new constructs beyond what is available in CSS. A <em>live</em> CSS is a javascript object that transparently writes/updates CSS (in browser) in real-time, as you play with this object. </p>
+
+<p>You no longer need to think in terms of having different class for different scenarios and using javascript switch classes. JS3 gives access to each style rule, collections, selectors, etc. as an object which you can play around with directly or indirectly with embedded javascript functions.</p>
+
+<p>JS3 can load predefined *.js3 files (comparable to *.css files) or can define a CSS on the fly using pure javascript. </p>
+
+<h2>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li>Pure JavaScript</li>
+<li>No external dependencies</li>
+<li>Supports <em>all</em> CSS features <em>as-is</em> (including experimental ones)</li>
+<li>Future proof syntax, anything that comes in future CSS structure, when not supported directly can be written-to as is</li>
+<li>Almost zero learning curve (if you know JavaScript and know how to write CSS, you already know 99% of JS3)</li>
+<li>No build steps (its not a pre-processor)</li>
+<li>Live CSS (updates CSS transparently in DOM, without any flicker)</li>
+<li>Open extension model to extend JS3 objects for further ease</li>
+<li>All client-side processing, no server trips</li>
+<li>No need to create additional CSS classes, and then switching them at runtime using jQuery or otherwise to see desired behavior. Instead directly play with style rules, styles, selectors,  or variables and see the effect instantly </li>
+<li>Define selector, styles, rules and variables, etc. only once and then share them across files</li>
+<li>Give friendly names to regions, styles and rules etc., instead of juggling with IDs or Class selectors </li>
+<li>Cross-reference JS3 files and let changes cascade in dependencies</li>
+<li>MIT License</li>
+</ul><h2>
+<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+
+<p><strong>1. Install</strong></p>
+
+<p>Install using <code>bower install JS3</code> or download <a href="https://github.com/vikasburman/js3/releases">latest release</a>.</p>
+
+<p><strong>2. Include</strong></p>
+
+<p>Include JS3 engine in your html page. </p>
+
+<blockquote>
+<p>There are no external dependencies of this library, therefore feel free to include in whatever order required. However this must be included before any <code>*.js3</code> file or any JS3 extension is being included.  </p>
+</blockquote>
+
+<div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"path/JS3.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<p>You may choose to include <code>JS3.core.js</code> instead, if you don't plan to use all extensions which otherwise are bundled into <code>JS3.min.js</code> file. When using <code>JS3.core.js</code>, you can choose to include individual extensions as per your requirement.</p>
+
+<p>Loading this file will create one global variable named <code>JS3</code>, that will serve as the anchor for all JS3 operations.</p>
+
+<p><strong>3. Load <code>*.js3</code> files</strong></p>
+
+<p>A <code>*.js3</code> file can be seen as a javascript counterpart of a <code>*.css</code> file. With JS3, instead of writing <code>.css</code> you would be writing <code>.js3</code> files, which are pure javascript files. These can be loaded like any other javascript file (including using any loader such as yepnope).</p>
+
+<div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"path/styles1.js3"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"path/styles2.js3"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<blockquote>
+<p>Although creating a <code>.js3</code> file is recommended for clean code separation, it is possible that you write your stylesheet code directly in any javascript file of yours. </p>
+
+<p>No matter how they are defined or loaded, all stylesheet objects will be able to see each other and can share style information at runtime.</p>
+</blockquote>
+
+<p>That's all is needed to start using the power of JS3.</p>
+
+<h2>
+<a name="create-your-first-js3-file" class="anchor" href="#create-your-first-js3-file"><span class="octicon octicon-link"></span></a>Create your first <code>.js3</code> file</h2>
+
+<blockquote>
+<p>A: The empty <code>.js3</code> file looks as below. Note this is defining a new CSS object using <code>JS3.css(&lt;objectName&gt;)</code> call and passing the resulting new css object as <code>this</code> context here:</p>
+</blockquote>
+
+<div class="highlight highlight-javascript"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> 
+
+<span class="c1">// style definitions in javascript notations will come here</span>
+
+<span class="p">}.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">JS3</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">'styles1'</span><span class="p">)));</span>
+</pre></div>
+
+<blockquote>
+<p>B: Define variables that you may want to change at runtime later or that you may want to use across different files:</p>
+</blockquote>
+
+<div class="highlight highlight-javascript"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span>
+
+    <span class="c1">// define variables</span>
+    <span class="p">.</span><span class="nx">vars</span><span class="p">(</span><span class="s1">'backgroundColor'</span><span class="p">,</span> <span class="s1">'yellow'</span><span class="p">)</span> 
+
+<span class="p">}.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">JS3</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">'styles1'</span><span class="p">)));</span>
+</pre></div>
+
+<p><strong>Note the use of <code>this</code> and no <code>;</code> at the end. It helps in chaining the calls together.</strong></p>
+
+<blockquote>
+<p>C: Define named style rules that you may want to use in multiple styles or change at runtime later or that you may want to use across different files:</p>
+</blockquote>
+
+<div class="highlight highlight-javascript"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span>
+
+    <span class="c1">// ...</span>
+
+    <span class="c1">// define named rules</span>
+    <span class="p">.</span><span class="nx">rules</span><span class="p">(</span><span class="s1">'allPadding'</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'px !important'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">rules</span><span class="p">(</span><span class="s1">'textColor'</span><span class="p">,</span> <span class="s1">'color'</span><span class="p">,</span> <span class="s1">'red'</span><span class="p">)</span>
+
+<span class="p">}.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">JS3</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">'styles1'</span><span class="p">)));</span>
+</pre></div>
+
+<blockquote>
+<p>D: Define named styles (collection of style rules) that you may want to apply on multiple selectors or want to change at runtime later or that you may want to use across different files:</p>
+</blockquote>
+
+<div class="highlight highlight-javascript"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span>
+
+    <span class="c1">// ...</span>
+
+    <span class="c1">// define named styles</span>
+    <span class="p">.</span><span class="nx">styles</span><span class="p">(</span><span class="s1">'basic'</span><span class="p">,</span> <span class="p">[</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">rules</span><span class="p">.</span><span class="nx">allPadding</span><span class="p">,</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">rule</span><span class="p">(</span><span class="s1">'background-color'</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">vars</span><span class="p">.</span><span class="nx">backgroundColor</span><span class="p">)</span> 
+    <span class="p">])</span>
+    <span class="p">.</span><span class="nx">styles</span><span class="p">(</span><span class="s1">'basicEx'</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">rules</span><span class="p">.</span><span class="nx">textColor</span><span class="p">)</span>
+
+<span class="p">}.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">JS3</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">'styles1'</span><span class="p">)));</span>
+</pre></div>
+
+<p><strong>Note the in-place definition of a rule when defining the style. Not every rule needs to be a named rule when there is limited use. Also note the use of the variable in the style rule.</strong></p>
+
+<blockquote>
+<p>E: Define named selectors to identify various regions of your webpage for easy styling. Like everything else, these can also be changed at runtime or can be shared across files:</p>
+</blockquote>
+
+<div class="highlight highlight-javascript"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span>
+
+    <span class="c1">// ...</span>
+
+    <span class="c1">// define selectors</span>
+    <span class="p">.</span><span class="nx">sel</span><span class="p">(</span><span class="s1">'Everywhere'</span><span class="p">,</span> <span class="s1">'body'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">sel</span><span class="p">(</span><span class="s1">'MainArea'</span><span class="p">,</span> <span class="s1">'#d1'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">sel</span><span class="p">(</span><span class="s1">'Widgets'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'#d2'</span><span class="p">,</span> <span class="s1">'#d3'</span><span class="p">])</span>
+
+<span class="p">}.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">JS3</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">'styles1'</span><span class="p">)));</span>
+</pre></div>
+
+<blockquote>
+<p>F: Define any at-rules. These can also be changed or shared across files:</p>
+</blockquote>
+
+<div class="highlight highlight-javascript"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span>
+
+    <span class="c1">// ...</span>
+
+    <span class="c1">// define at-rules</span>
+    <span class="p">.</span><span class="nx">at</span><span class="p">(</span><span class="s1">'UTF8'</span><span class="p">,</span> <span class="s1">'charset'</span><span class="p">,</span> <span class="s1">'UTF-8'</span><span class="p">)</span>
+
+<span class="p">}.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">JS3</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">'styles1'</span><span class="p">)));</span>
+</pre></div>
+
+<blockquote>
+<p>G: Once all definitions are done, start building up the stylesheet by applying styles to selectors, at-rules, etc.</p>
+</blockquote>
+
+<div class="highlight highlight-javascript"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span>
+
+    <span class="c1">// ...</span>
+
+    <span class="c1">// write styles</span>
+    <span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">at</span><span class="p">.</span><span class="nx">UTF8</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">sel</span><span class="p">.</span><span class="nx">Everywhere</span><span class="p">,</span> <span class="p">[</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">styles</span><span class="p">.</span><span class="nx">basic</span><span class="p">,</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">styles</span><span class="p">.</span><span class="nx">basicEx</span>
+    <span class="p">])</span>
+
+    <span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">sel</span><span class="p">.</span><span class="nx">Widgets</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">styles</span><span class="p">.</span><span class="nx">basic</span><span class="p">)</span>
+
+    <span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">sel</span><span class="p">.</span><span class="nx">MainArea</span><span class="p">,</span> 
+        <span class="k">this</span><span class="p">.</span><span class="nx">style</span><span class="p">([</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">rule</span><span class="p">(</span><span class="s1">'text-align'</span><span class="p">,</span> <span class="s1">'right'</span><span class="p">),</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">rule</span><span class="p">(</span><span class="s1">'letter-spacing'</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">'px'</span><span class="p">)</span>
+        <span class="p">])</span>
+    <span class="p">)</span>
+<span class="p">}.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">JS3</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">'styles1'</span><span class="p">)));</span>
+</pre></div>
+
+<p><strong>Note, how styles defined once, are being reused with multiple selectors. Also note how less used styles can be defined in-place without the need of defining them as named styles.</strong></p>
+
+<blockquote>
+<p>H: Once everything is done, mark closure:</p>
+</blockquote>
+
+<div class="highlight highlight-javascript"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span>
+
+    <span class="c1">// ...</span>
+
+    <span class="c1">// done</span>
+    <span class="p">.</span><span class="nx">end</span><span class="p">();</span> 
+<span class="p">}.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">JS3</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">'styles1'</span><span class="p">)));</span>
+</pre></div>
+
+<p><strong>Note the use of <code>;</code> here stops further chaining of calls.</strong></p>
+
+<blockquote>
+<p>I: Here is how complete <code>.js3</code> file looks like. Once this is loaded these styles will be available through <code>JS3.styles1</code> object (because the name we used here is <code>styles1</code>):</p>
+</blockquote>
+
+<div class="highlight highlight-javascript"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="k">this</span>
+
+    <span class="c1">// define variables</span>
+    <span class="p">.</span><span class="nx">vars</span><span class="p">(</span><span class="s1">'backgroundColor'</span><span class="p">,</span> <span class="s1">'yellow'</span><span class="p">)</span> 
+
+    <span class="c1">// define named rules</span>
+    <span class="p">.</span><span class="nx">rules</span><span class="p">(</span><span class="s1">'allPadding'</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'px !important'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">rules</span><span class="p">(</span><span class="s1">'textColor'</span><span class="p">,</span> <span class="s1">'color'</span><span class="p">,</span> <span class="s1">'red'</span><span class="p">)</span>
+
+    <span class="c1">// define named styles</span>
+    <span class="p">.</span><span class="nx">styles</span><span class="p">(</span><span class="s1">'basic'</span><span class="p">,</span> <span class="p">[</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">rules</span><span class="p">.</span><span class="nx">allPadding</span><span class="p">,</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">rule</span><span class="p">(</span><span class="s1">'background-color'</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">vars</span><span class="p">.</span><span class="nx">backgroundColor</span><span class="p">)</span> 
+    <span class="p">])</span>
+    <span class="p">.</span><span class="nx">styles</span><span class="p">(</span><span class="s1">'basicEx'</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">rules</span><span class="p">.</span><span class="nx">textColor</span><span class="p">)</span>
+
+    <span class="c1">// define selectors</span>
+    <span class="p">.</span><span class="nx">sel</span><span class="p">(</span><span class="s1">'Everywhere'</span><span class="p">,</span> <span class="s1">'body'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">sel</span><span class="p">(</span><span class="s1">'MainArea'</span><span class="p">,</span> <span class="s1">'#d1'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">sel</span><span class="p">(</span><span class="s1">'Widgets'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'#d1'</span><span class="p">,</span> <span class="s1">'#d2'</span><span class="p">])</span>
+
+    <span class="c1">// define at-rules</span>
+    <span class="p">.</span><span class="nx">at</span><span class="p">(</span><span class="s1">'UTF8'</span><span class="p">,</span> <span class="s1">'charset'</span><span class="p">,</span> <span class="s1">'UTF-8'</span><span class="p">)</span>
+
+    <span class="c1">// write styles</span>
+    <span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">at</span><span class="p">.</span><span class="nx">UTF8</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">sel</span><span class="p">.</span><span class="nx">Everywhere</span><span class="p">,</span> <span class="p">[</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">styles</span><span class="p">.</span><span class="nx">basic</span><span class="p">,</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">styles</span><span class="p">.</span><span class="nx">basicEx</span>
+    <span class="p">])</span>
+
+    <span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">sel</span><span class="p">.</span><span class="nx">Widgets</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">styles</span><span class="p">.</span><span class="nx">basic</span><span class="p">)</span>
+
+    <span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">sel</span><span class="p">.</span><span class="nx">MainArea</span><span class="p">,</span> 
+        <span class="k">this</span><span class="p">.</span><span class="nx">style</span><span class="p">([</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">rule</span><span class="p">(</span><span class="s1">'text-align'</span><span class="p">,</span> <span class="s1">'right'</span><span class="p">),</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">rule</span><span class="p">(</span><span class="s1">'letter-spacing'</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">'px'</span><span class="p">)</span>
+        <span class="p">])</span>
+    <span class="p">)</span>
+
+    <span class="c1">// done</span>
+    <span class="p">.</span><span class="nx">end</span><span class="p">();</span> 
+<span class="p">}.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">JS3</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">'styles1'</span><span class="p">)));</span>
+</pre></div>
+
+<p><strong>Note, everything is plain javascript here.</strong></p>
+
+<h2>
+<a name="using-the-power-of-js3" class="anchor" href="#using-the-power-of-js3"><span class="octicon octicon-link"></span></a>Using the power of JS3</h2>
+
+<p><code>JS3</code> global object provides access to all functionalists as well as all loaded stylesheets. Check out API for complete details. Some quick samples to give you an idea of various possibilities:</p>
+
+<blockquote>
+<p><strong>Change variable's value:</strong> Change will impact all style rules where 'backgroundColor' variable would have been used.</p>
+</blockquote>
+
+<pre><code>JS3.styles1.vars.backgroundColor('green');
+</code></pre>
+
+<blockquote>
+<p><strong>Turn a style rule off:</strong> Change will impact an update of all styles where this style rule would have been used.</p>
+</blockquote>
+
+<pre><code>JS3.styles1.rules.allPadding.off();
+</code></pre>
+
+<blockquote>
+<p><strong>Add new style rule:</strong> Change will impact an update of style where this style rule is being added.</p>
+</blockquote>
+
+<pre><code>JS3.styles1.styles.basic.rules.add(this.rule('background-color', 'red'));
+</code></pre>
+
+<blockquote>
+<p><strong>Add new style to a selector:</strong> Change will impact the selector.</p>
+</blockquote>
+
+<pre><code>JS3.styles1.sel.MainArea.styles.add(this.style(this.rule('background-color', 'white')));
+</code></pre>
+
+<blockquote>
+<p><strong>Change selector definition:</strong> Change will impact applying the styles on to this new selector; and removing styles from old selector value.</p>
+</blockquote>
+
+<pre><code>JS3.styles1.sel.MainArea('#d3');
+</code></pre>
+
+<blockquote>
+<p><strong>Across files re-usability:</strong> Access definitions from other files into this file. Remember to cross-reference (using <code>xref</code>) to enable cascade updates. In following case, whenever <code>allPadding2</code> style or <code>backgroundColor2</code> is updated in <code>styles2</code> or <code>styles3</code> objects respectively, <code>basic</code> style here in <code>styles1</code> object will also be updated.</p>
+</blockquote>
+
+<pre><code>(function() { 
+
+    .xref('styles2', 'styles3')
+    .styles('basic', [
+        JS3.styles2.rules.allPadding2,
+        this.rule('background-color', JS3.styles3.vars.backgroundColor2) 
+    ])
+
+}.apply(JS3.css('styles1')));
+</code></pre>
+
+<blockquote>
+<p><strong>Perform batch changes:</strong> Change will not reflect on DOM until last call in the sequence below.</p>
+</blockquote>
+
+<pre><code>JS3.suspendUpdates();
+...
+JS3.styles1.rules.allPadding.off();
+JS3.styles1.sel.MainArea('#d3');
+...
+JS3.resumeUpdates();
+</code></pre>
+
+<blockquote>
+<p><strong>Remain informed:</strong> Attach event handler and do anything else that is required when something changes anywhere.</p>
+</blockquote>
+
+<pre><code>JS3.onChange('myHandler', function(e) {
+
+// e.css holds css object where changes are done
+// e.type holds the type of change
+
+});
+</code></pre>
+
+<blockquote>
+<p>Possibilities are many. Check out the API to see what all is available.</p>
+</blockquote>
+
+<p><strong>Power of JS3 comes from following <em>five</em> key factors:</strong></p>
+
+<ul>
+<li>Rich object model built around CSS concepts: selectors, style rules, at-rules, etc. brings in required flexibility and helps in flattening JS3 learning curve</li>
+<li>Defining styles separately from selectors aids in maximum re-usability</li>
+<li>Core engine provides utmost control when dealing with multiple stylesheets</li>
+<li>Extensions helps in bringing domain (i.e., css) specific functionality right at the place of use</li>
+<li>Scopes helps in loading styles in a shared space without bleeding outside defined boundaries</li>
+</ul><h2>
+<a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h2>
+
+<p>Check out the API here.</p>
+
+<h2>
+<a name="release-history" class="anchor" href="#release-history"><span class="octicon octicon-link"></span></a>Release History</h2>
+
+<p>See the changelog <a href="https://github.com/vikasburman/js3/blob/master/CHANGELOG.md">here</a>.</p>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>Copyright (C) 2014 Vikas Burman. All rights reserved.</p>
+
+<p>Licensed under the terms of the <a href="https://github.com/vikasburman/js3/blob/master/LICENSE.md">MIT license</a>. You are free to use <strong>JS3</strong> under any open source or commercial project, as long as this copyright header is left intact.</p>
+
+<hr>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/vikasburman">vikasburman</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
