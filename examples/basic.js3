@@ -28,6 +28,7 @@
 	// selectors
 	.sel('Everywhere', 'body')
 	.sel('MainArea', '#d1')
+	.sel('MultiSel', ['#d1', '#d2'])
 	
 	// ats
 	.at('PrintedPage', 'media', 'print')
@@ -41,6 +42,11 @@
 		this.styles.basic2
 	])
 
+	.write(this.sel.MultiSel, [
+		this.styles.basic,	// using named styles
+		this.styles.basic2
+	])
+	
 	.write(this.sel.MainArea, 
 		this.style([		// using in-place style declaration			
 			this.rule('text-align', 'right'),

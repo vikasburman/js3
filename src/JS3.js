@@ -451,21 +451,37 @@
 			getValue.last.ruleArrayOrRuleLiteral = ruleArrayOrRuleLiteral;
 			return getValue;
 		};		
-		var selValueWrapperFunc = function(selectorOrFunc) {
+		var selValueWrapperFunc = function(selectorOrFuncOrArray) {
 			var getValue = function() { return ''; };
 			var getCompleteSelector = function(selector) { return selector + ' {' + stylesPlaceHolder + '}'; };
-			if (selectorOrFunc) {
-				if (isFunction(selectorOrFunc)) {
+			if (selectorOrFuncOrArray) {
+				if (isFunction(selectorOrFuncOrArray)) {
 					// this is a function
 					getValue = function(isSkipAddingSuffix) {
-						var value = selectorOrFunc.apply(self);
+						var value = selectorOrFuncOrArray.apply(self);
 						if (value && !isSkipAddingSuffix) { value = getCompleteSelector(value); }
 						return value;
-					};	
+					};
+				} else if (isArray(selectorOrFuncOrArray)) {
+					// this is an array (of strings, each representing one selector)
+					getValue = function(isSkipAddingSuffix) {
+						var index = 0;
+						var value = '';
+						for (index = 0; index < selectorOrFuncOrArray.length; ++index) {
+							if (value) {
+								value += ', ' + selectorOrFuncOrArray[index];
+							} else {
+								value = selectorOrFuncOrArray[index];
+							}
+						}					
+						if (value && !isSkipAddingSuffix) { value = getCompleteSelector(value); }
+						return value;
+					};				
+				
 				} else {
 					// this is value itself
 					getValue = function(isSkipAddingSuffix) {
-						var value = selectorOrFunc;
+						var value = selectorOrFuncOrArray;
 						if (value && !isSkipAddingSuffix) { value = getCompleteSelector(value); }
 						return value;
 					};					
@@ -960,9 +976,9 @@
 			}
 			return self;
 		};
-		self.sel = function(name, selectorOrFunc, canBeScoped) {
+		self.sel = function(name, selectorOrFuncOrArray, canBeScoped) {
 			if (self.sel[name]) { throw name + alreadyDefined; }
-			self.sel[name] = selWrapper(name, canBeScoped, selValueWrapperFunc(selectorOrFunc));
+			self.sel[name] = selWrapper(name, canBeScoped, selValueWrapperFunc(selectorOrFuncOrArray));
 			return self;
 		};		
 		self.rules = function(name, isAddPrefixesOrPropName, propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
