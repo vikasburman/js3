@@ -31,6 +31,7 @@ Features
 * Define selector, styles, rules and variables, etc. only once and then share them across files
 * Cross-reference JS3 files and let changes cascade in dependencies
 * MIT License
+
 Getting Started
 ---
 
