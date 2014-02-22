@@ -338,6 +338,16 @@ Release History
 ---
 See the changelog [here](https://github.com/vikasburman/js3/blob/master/CHANGELOG.md).
 
+Contributing to JS3 
+---
+Community contributions will made JS3 a better specification and framework. If you are interested in contributing, please follow these simple guidelines.
+
+Use [stackoverflow](http://stackoverflow.com/questions/tagged/js3) for questions. [Issues](https://github.com/vikasburman/js3/issues) should be opened if you find a problem or have an enhancement request.
+
+Send pull requests against the [develop](https://github.com/vikasburman/js3/tree/develop) branch. The [master](https://github.com/vikasburman/js3/tree/master) is stable so sending a pull request against it should really be used when there's a terrible bug that needs to be patched. 
+
+Supply a working sample against the enhancement.
+
 License
 ---
 Copyright (C) 2014 Vikas Burman. All rights reserved.
