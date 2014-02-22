@@ -194,7 +194,7 @@ Create your first `.js3` file
 	.end(); 
 }.apply(JS3.css('styles1')));
 ```
-**Note the use of `;` here stops further chaining of calls.
+**Note the use of `;` here stops further chaining of calls.**
 
 > I: Here is how complete `.js3` file looks like. Once this is loaded these styles will be available through `JS3.styles1` object (because the name we used here is `styles1`):
 
