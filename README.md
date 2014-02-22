@@ -30,7 +30,7 @@ Features
 * No external dependencies
 * Supports *all* CSS features *as-is* (including experimental ones)
 * Future proof syntax, anything that comes in future CSS structure, when not supported directly can be written-to as is
-* Almost zero learning curve (if you know JavaScript and know how to write CSS, you already know 99.9% of JS3)
+* Almost zero learning curve (if you know JavaScript and know how to write CSS, you already know 99% of JS3)
 * No build steps (its not a pre-processor)
 * Live CSS (updates CSS transparently in DOM, without any flicker)
 * Open extension model to extend JS3 objects for further ease
@@ -46,7 +46,7 @@ Getting Started
 
 **1. Install**
 
-Install using `bower install JS3` or download [latest release](https://github.com/vikasburman/js3/releases)
+Install using `bower install JS3` or download [latest release](https://github.com/vikasburman/js3/releases).
 
 **2. Include**
 
@@ -264,6 +264,7 @@ Using the power of JS3
 `JS3` global object provides access to all functionalists as well as all loaded stylesheets. Check out API for complete details. Some quick samples to give you an idea of various possibilities:
 
 > **Change variable's value:** Change will impact all style rules where 'backgroundColor' variable would have been used.
+
 ```
 JS3.styles1.vars.backgroundColor('green');
 ```
