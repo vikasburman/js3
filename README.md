@@ -16,14 +16,6 @@ You no longer need to think in terms of having different class for different sce
 
 JS3 can load predefined *.js3 files (comparable to *.css files) or can define a CSS on the fly using pure javascript. 
 
-Power of JS3 comes from following *five* key factors:
-
-* Rich object model built around CSS concepts: selectors, style rules, at-rules, etc. brings in required flexibility and helps in flattening JS3 learning curve
-* Defining styles separately from selectors aids in maximum re-usability
-* Core engine provides utmost control when dealing with multiple stylesheets
-* Extensions helps in bringing domain (i.e., css) specific functionality right at the place of use
-* Scopes helps in loading styles in a shared space without bleeding outside defined boundaries
-
 Features
 ---
 * Pure JavaScript
@@ -331,9 +323,13 @@ JS3.onChange('myHandler', function(e) {
 
 > Possibilities are many. Check out the API to see what all is available.
 
-Examples
----
-Explore examples given [here](https://github.com/vikasburman/js3/tree/master/examples).
+**Power of JS3 comes from following *five* key factors:**
+
+* Rich object model built around CSS concepts: selectors, style rules, at-rules, etc. brings in required flexibility and helps in flattening JS3 learning curve
+* Defining styles separately from selectors aids in maximum re-usability
+* Core engine provides utmost control when dealing with multiple stylesheets
+* Extensions helps in bringing domain (i.e., css) specific functionality right at the place of use
+* Scopes helps in loading styles in a shared space without bleeding outside defined boundaries
 
 FAQs
 ---
