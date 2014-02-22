@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.1.3',
+		VERSION: '0.2.0',
 		COPYRIGHT: 'Copyright © 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
@@ -39,6 +39,7 @@
 			alreadyDefined = ' already defined',
 			notSupported = ' cannot be applied',
 			allItems = [], // {type: 'at'|'sel'|'decl', item: atObject|selObject|declaration}
+			allPfxCache = null,
 			id = '',
 			isLoaded = false,
 			xref = false,
@@ -48,6 +49,7 @@
 			isEnd = false,
 			selectorScopes = [];
 		var valueTypes = {
+			pfx: 'prefix',
 			vars: 'variable',
 			rule: 'rule',
 			style: 'style',
@@ -66,6 +68,17 @@
 			kf: 'keyframes',
 			sup: 'supports'		
 		};
+		var atRuleTemplates = {
+			'charset': '@charset "' + atRuleQueryOrValuePlaceHolder + '";',
+			'font-face': '@font-face {' + selsPlaceHolder + '}',
+			'import': '@import ' + atRuleQueryOrValuePlaceHolder + ';',
+			'namespace': '@namespace ' + atRuleQueryOrValuePlaceHolder + ';',
+			'page': '@page ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'media': '@media ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'document': '@document ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'keyframes': '@keyframes ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'supports': '@supports ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}'
+		};		
 		var randomName = function() { 
 			var S4 = function() { return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1); };
 			return ("_" + S4() + S4() + '_' + S4() + '_' + S4() + '_' + S4() + '_' + S4() + S4() + S4());		
@@ -77,7 +90,9 @@
 				index = 0;			
 			for (index = 0; index < styles.length; ++index) {
 				style = styles[index];
-				allStyles += ' ' + style.apply(self);
+				if (style.isOn()) {
+					allStyles += ' ' + style.apply(self);
+				}
 			}
 			return allStyles;
 		};
@@ -102,50 +117,56 @@
 				switch(item.type) {
 					case valueTypes.sel:
 						sel = item.item;
-						selBody = sel.apply(self);
-						styles = selBody.replace(stylesPlaceHolder, generateStyles(sel.styles()));
-						// add scopes, if required
-						if (sel.raw.canBeScoped() && 
-							self.parent.settings.isConsiderScopes && 
-							selectorScopes.length > 0) {
-							for (index2 = 0; index2 < selectorScopes.length; ++index2) {
-								scope = selectorScopes[index2];
-								styles += (scope + ' ' + styles);
+						if (sel.isOn()) {
+							selBody = sel.apply(self);
+							styles = selBody.replace(stylesPlaceHolder, generateStyles(sel.styles()));
+							// add scopes, if required
+							if (sel.raw.canBeScoped() && 
+								self.parent.settings.isConsiderScopes && 
+								selectorScopes.length > 0) {
+								for (index2 = 0; index2 < selectorScopes.length; ++index2) {
+									scope = selectorScopes[index2];
+									styles += (scope + ' ' + styles);
+								}
 							}
+							itemCss = styles;
 						}
-						itemCss = styles;
 						break;
 					case valueTypes.at:
 						at = item.item;
-						atBody = at.apply(self);
-						if (at.raw.canEmbedSels()) {
-							styles = '';
-							selName = '';
-							sels = at.sels.apply(self);
-							for (index2 = 0; index2 < sels.length; ++index2) {
-								selName = sels[index2];
-								if (at.raw.hasSpecialSelectors()) {
-									sel = null;
-									selBody = selName + ' {' + stylesPlaceHolder + '}';
-									styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
-								} else {
-									sel = self.sel[selName];
-									selBody = sel();
-									styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
-									// add scopes, if required
-									if (sel.raw.canBeScoped() && 
-										self.parent.settings.isConsiderScopes && 
-										selectorScopes.length > 0) {
-										for (index3 = 0; index3 < selectorScopes.length; ++index3) {
-											scope = selectorScopes[index3];
-											styles += (scope + ' ' + styles);
+						if (at.isOn()) {
+							atBody = at.apply(self);
+							if (at.raw.canEmbedSels()) {
+								styles = '';
+								selName = '';
+								sels = at.sels.apply(self);
+								for (index2 = 0; index2 < sels.length; ++index2) {
+									selName = sels[index2];
+									if (at.raw.hasSpecialSelectors()) {
+										sel = null;
+										selBody = selName + ' {' + stylesPlaceHolder + '}';
+										styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
+									} else {
+										sel = self.sel[selName];
+										if (sel.isOn()) {
+											selBody = sel();
+											styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
+											// add scopes, if required
+											if (sel.raw.canBeScoped() && 
+												self.parent.settings.isConsiderScopes && 
+												selectorScopes.length > 0) {
+												for (index3 = 0; index3 < selectorScopes.length; ++index3) {
+													scope = selectorScopes[index3];
+													styles += (scope + ' ' + styles);
+												}
+											}	
 										}
-									}									
+									}
 								}
+								itemCss = atBody.replace(selsPlaceHolder, styles);
+							} else {
+								itemCss = atBody;
 							}
-							itemCss = atBody.replace(selsPlaceHolder, styles);
-						} else {
-							itemCss = atBody;
 						}
 						break;
 					case valueTypes.decl:
@@ -191,17 +212,7 @@
 		};
 		
 		// definition
-		var atRuleTemplates = {
-			'charset': '@charset "' + atRuleQueryOrValuePlaceHolder + '";',
-			'font-face': '@font-face {' + selsPlaceHolder + '}',
-			'import': '@import ' + atRuleQueryOrValuePlaceHolder + ';',
-			'namespace': '@namespace ' + atRuleQueryOrValuePlaceHolder + ';',
-			'page': '@page ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
-			'media': '@media ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
-			'document': '@document ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
-			'keyframes': '@keyframes ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
-			'supports': '@supports ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}'
-		};
+
 		var stylesAdded = function(count, type, to) {
 			isDirty = true;
 			if (isLoaded && self.parent.settings.isLogChanges) {
@@ -229,6 +240,15 @@
 				self.reload();
 			}	
 		};
+		var statusChanged = function(type, name, oldValue, newValue) {
+			isDirty = true;
+			if (isLoaded && self.parent.settings.isLogChanges) {
+				window.console.log('Inclusion status of ' + type + ' "' + name + '" is changed from "' + oldValue + '" to "' + newValue + '".');
+			}
+			if (isLoaded && self.parent.settings.isReloadOnChange) {
+				self.reload();
+			}	
+		};		
 		var varValueWrapperFunc = function(varValueOrFunc) {
 			var getValue = function() { return null; };
 			if (varValueOrFunc) {
@@ -242,6 +262,26 @@
 					// this is value itself
 					getValue = function() {
 						var value = varValueOrFunc;
+						return value;
+					};					
+				}
+			}
+			getValue.plain = function() { return getValue(true); };
+			return getValue;
+		};	
+		var pfxValueWrapperFunc = function(pfxValueOrFunc) {
+			var getValue = function() { return null; };
+			if (pfxValueOrFunc) {
+				if (isFunction(pfxValueOrFunc)) {
+					// this is a function
+					getValue = function() {
+						var value = pfxValueOrFunc.apply(self);
+						return value;
+					};	
+				} else {
+					// this is value itself
+					getValue = function() {
+						var value = pfxValueOrFunc;
 						return value;
 					};					
 				}
@@ -443,6 +483,25 @@
 			getValue.plain = function() { return getValue(true); };
 			return getValue;
 		};			
+		var pfxWrapper = function(pfxName, pfxValueWrapper) {
+			var wrapper = function(newPfxValueOrFunc) {
+				if (newPfxValueOrFunc) { 
+					var oldValue = pfxValueWrapper(); 
+					pfxValueWrapper = pfxValueWrapperFunc(newPfxValueOrFunc); 
+					valueChanged(valueTypes.pfx, pfxName, oldValue, pfxValueWrapper()); 
+				}
+				return pfxValueWrapper();
+			};
+			var pfxId = randomName();
+			wrapper.id = function() { return pfxId; };				
+			wrapper.type = function() { return valueTypes.pfx; };
+			wrapper.fName = function() { return pfxName; };
+			wrapper.raw = {};
+			wrapper.raw.value = function() { return pfxValueWrapper.plain(); };
+			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
+			self.parent.ex.me(self, wrapper, valueTypes.pfx, wrapper.raw.type(), '');
+			return wrapper;		
+		};
 		var varWrapper = function(varName, varValueWrapper) {
 			var wrapper = function(newVarValueOrFunc) {
 				if (newVarValueOrFunc) { 
@@ -462,11 +521,29 @@
 			self.parent.ex.me(self, wrapper, valueTypes.vars, wrapper.raw.type(), '');
 			return wrapper;
 		};
-		var ruleWrapper = function(ruleName, propName, propValueWrapper) {
+		var ruleWrapper = function(ruleName, isAddPrefixes, propName, propValueWrapper) {
 			var getRule = function(propValue) {
 				if (propValue) { propValue = propValue.toString(); }
 				if (propValue.substr(propValue.length - 1 !== ';')) { propValue += ';'; }
-				return propName + ':' + propValue;
+				var ruleDef = propName + ':' + propValue;
+				if (isAddPrefixes) {
+					if (!allPfxCache) {
+						var pfx = null;
+						allPfxCache = [];
+						for(pfx in self.pfx) {
+							if (self.pfx.hasOwnProperty(pfx)) {
+								if (isFunction(self.pfx[pfx].type)) {
+									allPfxCache.push(self.pfx[pfx].apply(self));
+								}
+							}
+						}
+					} 
+					var index = 0;
+					for (index = 0; index < allPfxCache.length; ++index) {	
+						ruleDef = (allPfxCache[index] + propName + ':' + propValue) + ruleDef;
+					}
+				}
+				return ruleDef;
 			};
 			var wrapper = function(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
 				if (arguments.length > 0) { 
@@ -479,11 +556,26 @@
 				return getRule(propValueWrapper());
 			};
 			var ruleId = randomName();
+			var isOn = true;
 			wrapper.id = function() { return ruleId; };			
 			wrapper.type = function() { return valueTypes.rule; };
 			wrapper.fName = function() { return ruleName; };
+			wrapper.off = function() { 
+				if (isOn) {
+					isOn = false;
+					statusChanged(valueTypes.rule, ruleName, 'on', 'off');
+				}
+			};
+			wrapper.on = function() { 
+				if (!isOn) {
+					isOn = true;
+					statusChanged(valueTypes.rule, ruleName, 'off', 'on');
+				}			
+			};
+			wrapper.isOn = function() { return isOn; };			
 			wrapper.raw = {};
 			wrapper.raw.property = function() { return propName; };
+			wrapper.raw.hasPrefixes = function() { return isAddPrefixes; };
 			wrapper.raw.value = function() { return propValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
 			wrapper.raw.suffix = function() {
@@ -495,13 +587,15 @@
 			return wrapper;
 		};
 		var styleWrapper = function(styleName, styleValueWrapper) {
-			var getStyles = function(props) { 
+			var getStyles = function(rules) { 
 				var theStyles = '';
 				var index = 0;
-				var prop = null;
-				for (index = 0; index < props.length; ++index) {
-					prop = props[index];
-					theStyles += prop.apply(self);
+				var rule = null;
+				for (index = 0; index < rules.length; ++index) {
+					rule = rules[index];
+					if (rule.isOn()) {
+						theStyles += rule.apply(self);
+					}
 				}
 				return theStyles;
 			};				
@@ -515,9 +609,23 @@
 				return getStyles(styleValueWrapper());
 			};
 			var styleId = randomName();
+			var isOn = true;
 			wrapper.id = function() { return styleId; };
 			wrapper.type = function() { return valueTypes.style; };
 			wrapper.fName = function() { return styleName; };
+			wrapper.off = function() { 
+				if (isOn) {
+					isOn = false;
+					statusChanged(valueTypes.style, styleName, 'on', 'off');
+				}
+			};
+			wrapper.on = function() { 
+				if (!isOn) {
+					isOn = true;
+					statusChanged(valueTypes.style, styleName, 'off', 'on');
+				}			
+			};
+			wrapper.isOn = function() { return isOn; };			
 			wrapper.rules = function() { return styleValueWrapper.plain(); };
 			wrapper.rules.add = function(newRules, isInsertOnTop) {
 				var processedRuleArray = styleValueWrapper.plain();
@@ -579,9 +687,23 @@
 			};
 			var selId = randomName();
 			var styles = [];
+			var isOn = true;
 			wrapper.id = function() { return selId; };
 			wrapper.type = function() { return valueTypes.sel; };
 			wrapper.fName = function() { return selName; };
+			wrapper.off = function() { 
+				if (isOn) {
+					isOn = false;
+					statusChanged(valueTypes.sel, selName, 'on', 'off');
+				}
+			};
+			wrapper.on = function() { 
+				if (!isOn) {
+					isOn = true;
+					statusChanged(valueTypes.sel, selName, 'off', 'on');
+				}			
+			};
+			wrapper.isOn = function() { return isOn; };
 			wrapper.styles = function() { return styles; };
 			wrapper.styles.value = function() { return generateStyles(wrapper.styles()); };
 			wrapper.styles.add = function(newStyles) {
@@ -643,9 +765,23 @@
 			};
 			var atId = randomName();
 			var groupedStyles = {};
+			var isOn = true;
 			wrapper.id = function() { return atId; };
 			wrapper.type = function() { return valueTypes.at; };
 			wrapper.fName = function() { return atName; };
+			wrapper.off = function() { 
+				if (isOn) {
+					isOn = false;
+					statusChanged(valueTypes.at, atName, 'on', 'off');
+				}
+			};
+			wrapper.on = function() { 
+				if (!isOn) {
+					isOn = true;
+					statusChanged(valueTypes.at, atName, 'off', 'on');
+				}			
+			};
+			wrapper.isOn = function() { return isOn; };
 			if (canEmbedSels) {
 				wrapper.sels = function() { 
 					var sels = [];
@@ -745,12 +881,39 @@
 			}
 			return self;
 		};
-		self.rule = function(propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
-			return ruleWrapper(randomName(), propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone));
+		self.rule = function(isAddPrefixesOrPropName, propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
+			var isAddPrefixes = false;
+			if (typeof isAddPrefixesOrPropName === 'string') {
+				if (valueSuffixOrValueArrayOrValueLiteral) { valueSuffixOrFuncOrNone = valueSuffixOrValueArrayOrValueLiteral; }
+				if (valueOrValueFuncOrCondFunc) { valueSuffixOrValueArrayOrValueLiteral = valueOrValueFuncOrCondFunc; }
+				if (propName) { valueOrValueFuncOrCondFunc = propName; }
+				propName = isAddPrefixesOrPropName;
+				isAddPrefixes = false;
+			} else {
+				isAddPrefixes = isAddPrefixesOrPropName;
+			}	
+			return ruleWrapper(randomName(), isAddPrefixes, propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone));
 		};
 		self.style = function(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral) {
 			return styleWrapper(randomName(), styleValueWrapperFunc(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral));
 		};	
+		self.pfx = function(para1, para2) {
+			if (arguments.length === 2) {
+				// name, value
+				if (self.pfx[para1]) { throw para1 + alreadyDefined; }
+				self.pfx[para1] = pfxWrapper(para1, pfxValueWrapperFunc(para2));
+			} else if (isLiteral(para1)) {
+				// { key1: value1, key2: value3, ... }
+				var property = null;
+				for (property in para1) {
+					if (para1.hasOwnProperty(property)) {
+						if (self.pfx[property]) { throw property + alreadyDefined; }
+						self.pfx[property] = pfxWrapper(property, pfxValueWrapperFunc(para1[property])); 
+					}
+				}
+			}
+			return self;
+		};		
 		self.vars = function(para1, para2) {
 			if (arguments.length === 2) {
 				// name, value
@@ -773,9 +936,19 @@
 			self.sel[name] = selWrapper(name, canBeScoped, selValueWrapperFunc(selectorOrFunc));
 			return self;
 		};		
-		self.rules = function(name, propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
+		self.rules = function(name, isAddPrefixesOrPropName, propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
 			if (self.rules[name]) { throw name + alreadyDefined; }
-			self.rules[name] = ruleWrapper(name, propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone)); 
+			var isAddPrefixes = false;
+			if (typeof isAddPrefixesOrPropName === 'string') {
+				if (valueSuffixOrValueArrayOrValueLiteral) { valueSuffixOrFuncOrNone = valueSuffixOrValueArrayOrValueLiteral; }
+				if (valueOrValueFuncOrCondFunc) { valueSuffixOrValueArrayOrValueLiteral = valueOrValueFuncOrCondFunc; }
+				if (propName) { valueOrValueFuncOrCondFunc = propName; }
+				propName = isAddPrefixesOrPropName;
+				isAddPrefixes = false;
+			} else {
+				isAddPrefixes = isAddPrefixesOrPropName;
+			}
+			self.rules[name] = ruleWrapper(name, isAddPrefixes, propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone)); 
 			return self;
 		};	
 		self.styles = function(name, ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral) {
