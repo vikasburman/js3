@@ -88,7 +88,7 @@ Create your first `.js3` file
 
 }.apply(JS3.css('styles1')));
 ```
-**Note the use of `this`. It helps in chaining the calls together.**
+**Note the use of `this` and no `;` at the end. It helps in chaining the calls together.**
 
 > C: Define named style rules that you may want to use in multiple styles or change at runtime later or that you may want to use across different files:
 
@@ -105,7 +105,7 @@ Create your first `.js3` file
 }.apply(JS3.css('styles1')));
 ```
 
-> D: Define named styles that you may want to apply on multiple selectors or want to change at runtime later or that you may want to use across different files:
+> D: Define named styles (collection of style rules) that you may want to apply on multiple selectors or want to change at runtime later or that you may want to use across different files:
 
 ```javascript
 (function() { 
