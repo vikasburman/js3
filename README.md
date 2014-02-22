@@ -221,8 +221,8 @@ Create your first `.js3` file
 	.sel('MainArea', '#d1')
 	.sel('Widgets', ['#d1', '#d2'])
 	
-       // define at-rules
-        .at('UTF8', 'charset', 'UTF-8')
+	// define at-rules
+	.at('UTF8', 'charset', 'UTF-8')
 
 	// write styles
 	.write(this.at.UTF8)
