@@ -1,6 +1,10 @@
 (function() { 
 	this
 	
+	// prefixes
+	.pfx('Mozilla', '-moz-')
+	.pfx('WebKit', '-webkit-')
+	
 	// variables
 	.vars('color', 'yellow') // one variable
 	.vars({					 // multiple variables
@@ -9,7 +13,7 @@
 	}) 
 	
 	// named rules
-	.rules('allPadding', 'padding', 100, 'px !important')
+	.rules('allPadding', true, 'padding', 100, 'px !important')
 	.rules('allPadding2', 'padding', '200', 'px !important')
 	
 	// named styles

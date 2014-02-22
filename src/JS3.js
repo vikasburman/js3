@@ -39,6 +39,7 @@
 			alreadyDefined = ' already defined',
 			notSupported = ' cannot be applied',
 			allItems = [], // {type: 'at'|'sel'|'decl', item: atObject|selObject|declaration}
+			allPfxCache = null,
 			id = '',
 			isLoaded = false,
 			xref = false,
@@ -48,6 +49,7 @@
 			isEnd = false,
 			selectorScopes = [];
 		var valueTypes = {
+			pfx: 'prefix',
 			vars: 'variable',
 			rule: 'rule',
 			style: 'style',
@@ -66,6 +68,17 @@
 			kf: 'keyframes',
 			sup: 'supports'		
 		};
+		var atRuleTemplates = {
+			'charset': '@charset "' + atRuleQueryOrValuePlaceHolder + '";',
+			'font-face': '@font-face {' + selsPlaceHolder + '}',
+			'import': '@import ' + atRuleQueryOrValuePlaceHolder + ';',
+			'namespace': '@namespace ' + atRuleQueryOrValuePlaceHolder + ';',
+			'page': '@page ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'media': '@media ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'document': '@document ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'keyframes': '@keyframes ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
+			'supports': '@supports ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}'
+		};		
 		var randomName = function() { 
 			var S4 = function() { return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1); };
 			return ("_" + S4() + S4() + '_' + S4() + '_' + S4() + '_' + S4() + '_' + S4() + S4() + S4());		
@@ -199,17 +212,7 @@
 		};
 		
 		// definition
-		var atRuleTemplates = {
-			'charset': '@charset "' + atRuleQueryOrValuePlaceHolder + '";',
-			'font-face': '@font-face {' + selsPlaceHolder + '}',
-			'import': '@import ' + atRuleQueryOrValuePlaceHolder + ';',
-			'namespace': '@namespace ' + atRuleQueryOrValuePlaceHolder + ';',
-			'page': '@page ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
-			'media': '@media ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
-			'document': '@document ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
-			'keyframes': '@keyframes ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
-			'supports': '@supports ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}'
-		};
+
 		var stylesAdded = function(count, type, to) {
 			isDirty = true;
 			if (isLoaded && self.parent.settings.isLogChanges) {
@@ -259,6 +262,26 @@
 					// this is value itself
 					getValue = function() {
 						var value = varValueOrFunc;
+						return value;
+					};					
+				}
+			}
+			getValue.plain = function() { return getValue(true); };
+			return getValue;
+		};	
+		var pfxValueWrapperFunc = function(pfxValueOrFunc) {
+			var getValue = function() { return null; };
+			if (pfxValueOrFunc) {
+				if (isFunction(pfxValueOrFunc)) {
+					// this is a function
+					getValue = function() {
+						var value = pfxValueOrFunc.apply(self);
+						return value;
+					};	
+				} else {
+					// this is value itself
+					getValue = function() {
+						var value = pfxValueOrFunc;
 						return value;
 					};					
 				}
@@ -460,6 +483,25 @@
 			getValue.plain = function() { return getValue(true); };
 			return getValue;
 		};			
+		var pfxWrapper = function(pfxName, pfxValueWrapper) {
+			var wrapper = function(newPfxValueOrFunc) {
+				if (newPfxValueOrFunc) { 
+					var oldValue = pfxValueWrapper(); 
+					pfxValueWrapper = pfxValueWrapperFunc(newPfxValueOrFunc); 
+					valueChanged(valueTypes.pfx, pfxName, oldValue, pfxValueWrapper()); 
+				}
+				return pfxValueWrapper();
+			};
+			var pfxId = randomName();
+			wrapper.id = function() { return pfxId; };				
+			wrapper.type = function() { return valueTypes.pfx; };
+			wrapper.fName = function() { return pfxName; };
+			wrapper.raw = {};
+			wrapper.raw.value = function() { return pfxValueWrapper.plain(); };
+			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
+			self.parent.ex.me(self, wrapper, valueTypes.pfx, wrapper.raw.type(), '');
+			return wrapper;		
+		};
 		var varWrapper = function(varName, varValueWrapper) {
 			var wrapper = function(newVarValueOrFunc) {
 				if (newVarValueOrFunc) { 
@@ -479,11 +521,29 @@
 			self.parent.ex.me(self, wrapper, valueTypes.vars, wrapper.raw.type(), '');
 			return wrapper;
 		};
-		var ruleWrapper = function(ruleName, propName, propValueWrapper) {
+		var ruleWrapper = function(ruleName, isAddPrefixes, propName, propValueWrapper) {
 			var getRule = function(propValue) {
 				if (propValue) { propValue = propValue.toString(); }
 				if (propValue.substr(propValue.length - 1 !== ';')) { propValue += ';'; }
-				return propName + ':' + propValue;
+				var ruleDef = propName + ':' + propValue;
+				if (isAddPrefixes) {
+					if (!allPfxCache) {
+						var pfx = null;
+						allPfxCache = [];
+						for(pfx in self.pfx) {
+							if (self.pfx.hasOwnProperty(pfx)) {
+								if (isFunction(self.pfx[pfx].type)) {
+									allPfxCache.push(self.pfx[pfx].apply(self));
+								}
+							}
+						}
+					} 
+					var index = 0;
+					for (index = 0; index < allPfxCache.length; ++index) {	
+						ruleDef = (allPfxCache[index] + propName + ':' + propValue) + ruleDef;
+					}
+				}
+				return ruleDef;
 			};
 			var wrapper = function(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
 				if (arguments.length > 0) { 
@@ -515,6 +575,7 @@
 			wrapper.isOn = function() { return isOn; };			
 			wrapper.raw = {};
 			wrapper.raw.property = function() { return propName; };
+			wrapper.raw.hasPrefixes = function() { return isAddPrefixes; };
 			wrapper.raw.value = function() { return propValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
 			wrapper.raw.suffix = function() {
@@ -820,12 +881,39 @@
 			}
 			return self;
 		};
-		self.rule = function(propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
-			return ruleWrapper(randomName(), propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone));
+		self.rule = function(isAddPrefixesOrPropName, propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
+			var isAddPrefixes = false;
+			if (typeof isAddPrefixesOrPropName === 'string') {
+				if (valueSuffixOrValueArrayOrValueLiteral) { valueSuffixOrFuncOrNone = valueSuffixOrValueArrayOrValueLiteral; }
+				if (valueOrValueFuncOrCondFunc) { valueSuffixOrValueArrayOrValueLiteral = valueOrValueFuncOrCondFunc; }
+				if (propName) { valueOrValueFuncOrCondFunc = propName; }
+				propName = isAddPrefixesOrPropName;
+				isAddPrefixes = false;
+			} else {
+				isAddPrefixes = isAddPrefixesOrPropName;
+			}	
+			return ruleWrapper(randomName(), isAddPrefixes, propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone));
 		};
 		self.style = function(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral) {
 			return styleWrapper(randomName(), styleValueWrapperFunc(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral));
 		};	
+		self.pfx = function(para1, para2) {
+			if (arguments.length === 2) {
+				// name, value
+				if (self.pfx[para1]) { throw para1 + alreadyDefined; }
+				self.pfx[para1] = pfxWrapper(para1, pfxValueWrapperFunc(para2));
+			} else if (isLiteral(para1)) {
+				// { key1: value1, key2: value3, ... }
+				var property = null;
+				for (property in para1) {
+					if (para1.hasOwnProperty(property)) {
+						if (self.pfx[property]) { throw property + alreadyDefined; }
+						self.pfx[property] = pfxWrapper(property, pfxValueWrapperFunc(para1[property])); 
+					}
+				}
+			}
+			return self;
+		};		
 		self.vars = function(para1, para2) {
 			if (arguments.length === 2) {
 				// name, value
@@ -848,9 +936,19 @@
 			self.sel[name] = selWrapper(name, canBeScoped, selValueWrapperFunc(selectorOrFunc));
 			return self;
 		};		
-		self.rules = function(name, propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
+		self.rules = function(name, isAddPrefixesOrPropName, propName, valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone) {
 			if (self.rules[name]) { throw name + alreadyDefined; }
-			self.rules[name] = ruleWrapper(name, propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone)); 
+			var isAddPrefixes = false;
+			if (typeof isAddPrefixesOrPropName === 'string') {
+				if (valueSuffixOrValueArrayOrValueLiteral) { valueSuffixOrFuncOrNone = valueSuffixOrValueArrayOrValueLiteral; }
+				if (valueOrValueFuncOrCondFunc) { valueSuffixOrValueArrayOrValueLiteral = valueOrValueFuncOrCondFunc; }
+				if (propName) { valueOrValueFuncOrCondFunc = propName; }
+				propName = isAddPrefixesOrPropName;
+				isAddPrefixes = false;
+			} else {
+				isAddPrefixes = isAddPrefixesOrPropName;
+			}
+			self.rules[name] = ruleWrapper(name, isAddPrefixes, propName, propValueWrapperFunc(valueOrValueFuncOrCondFunc, valueSuffixOrValueArrayOrValueLiteral, valueSuffixOrFuncOrNone)); 
 			return self;
 		};	
 		self.styles = function(name, ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral) {
