@@ -338,6 +338,26 @@ Release History
 ---
 See the changelog [here](https://github.com/vikasburman/js3/blob/master/CHANGELOG.md).
 
+Contributing to JS3
+---
+
+Community contributions will made JS3 a better specification and framework. If you are interested in contributing, please follow these simple guidelines.
+
+Use [stackoverflow](http://stackoverflow.com/questions/tagged/js3) for questions. [Issues](https://github.com/vikasburman/js3/issues) should be opened if you find a problem or have an enhancement request.
+
+Supply a working sample against the enhancement.
+
+Similar Projects
+---
+
+There are several projects which are on similar lines, i.e., CSS and JavaScript together. However none of below mentioned, do it in totality and provide an end-to-end seamless experience for stylesheet processing.
+
+* [1996's W3.org proposal of JSSS](http://www.w3.org/Submission/1996/1/WD-jsss-960822)
+* [1997's Netscape attempt of bringing CSS together with JavaScript](http://sunsite.uakom.sk/sunworldonline/swol-04-1997/swol-04-webmaster.html)
+* [David Walsh's trick for directly playing with style DOM element to update stylesheet](http://davidwalsh.name/add-rules-stylesheets)
+* [Jason Graves' approach to modify styles as well as cascading from style islands/blocks or externally linked css files using Javascript](http://glm-jss.sourceforge.net/)
+
+*If you find something else that is coming up on similar lines, please share your findings and I will incorporate it here for everyone else's reference.*
 
 License
 ---
