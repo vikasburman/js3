@@ -331,10 +331,6 @@ JS3.onChange('myHandler', function(e) {
 * Extensions helps in bringing domain (i.e., css) specific functionality right at the place of use
 * Scopes helps in loading styles in a shared space without bleeding outside defined boundaries
 
-FAQs
----
-All frequently asked questions are answered here.
-
 API
 ---
 Check out the API here.
