@@ -24,11 +24,12 @@ Features
 * Future proof syntax, anything that comes in future CSS structure, when not supported directly can be written-to as is
 * Almost zero learning curve (if you know JavaScript and know how to write CSS, you already know 99.9% of JS3)
 * No build steps (its not a pre-processor)
-* Live CSS (updates loaded CSS transparently in DOM, without any flicker)
+* Live CSS (updates CSS transparently in DOM, without any flicker)
 * Open extension model to extend JS3 objects for further ease
 * All client-side processing, no server trips
 * No need to create additional CSS classes, and then switching them at runtime using jQuery or otherwise to see desired behavior. Instead directly play with style rules, styles, selectors,  or variables and see the effect instantly 
 * Define selector, styles, rules and variables, etc. only once and then share them across files
+* Give friendly names to regions, styles and rules etc., instead of juggling with IDs or Class selectors 
 * Cross-reference JS3 files and let changes cascade in dependencies
 * MIT License
 
