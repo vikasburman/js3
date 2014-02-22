@@ -104,6 +104,7 @@
 				itemCss = '',
 				sels = null,
 				styles = '',
+				atStyles = '',
 				index = 0,
 				selName = '',
 				selBody = '',
@@ -120,16 +121,18 @@
 						if (sel.isOn()) {
 							selBody = sel.apply(self);
 							styles = selBody.replace(stylesPlaceHolder, generateStyles(sel.styles()));
-							// add scopes, if required
-							if (sel.raw.canBeScoped() && 
-								self.parent.settings.isConsiderScopes && 
-								selectorScopes.length > 0) {
-								for (index2 = 0; index2 < selectorScopes.length; ++index2) {
-									scope = selectorScopes[index2];
-									styles += (scope + ' ' + styles);
+							if (styles) {
+								// add scopes, if required
+								if (sel.raw.canBeScoped() && 
+									self.parent.settings.isConsiderScopes && 
+									selectorScopes.length > 0) {
+									for (index2 = 0; index2 < selectorScopes.length; ++index2) {
+										scope = selectorScopes[index2];
+										styles += (scope + ' ' + styles);
+									}
 								}
+								itemCss = styles;
 							}
-							itemCss = styles;
 						}
 						break;
 					case valueTypes.at:
@@ -145,25 +148,33 @@
 									if (at.raw.hasSpecialSelectors()) {
 										sel = null;
 										selBody = selName + ' {' + stylesPlaceHolder + '}';
-										styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
+										atStyles = generateStyles(at.styles(selName));
+										if (atStyles) {
+											styles += selBody.replace(stylesPlaceHolder, atStyles);
+										}
 									} else {
 										sel = self.sel[selName];
 										if (sel.isOn()) {
 											selBody = sel();
-											styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
-											// add scopes, if required
-											if (sel.raw.canBeScoped() && 
-												self.parent.settings.isConsiderScopes && 
-												selectorScopes.length > 0) {
-												for (index3 = 0; index3 < selectorScopes.length; ++index3) {
-													scope = selectorScopes[index3];
-													styles += (scope + ' ' + styles);
+											atStyles = generateStyles(at.styles(selName));
+											if (atStyles) {
+												styles += selBody.replace(stylesPlaceHolder, atStyles);
+												// add scopes, if required
+												if (sel.raw.canBeScoped() && 
+													self.parent.settings.isConsiderScopes && 
+													selectorScopes.length > 0) {
+													for (index3 = 0; index3 < selectorScopes.length; ++index3) {
+														scope = selectorScopes[index3];
+														styles += (scope + ' ' + styles);
+													}
 												}
-											}	
+											}
 										}
 									}
 								}
-								itemCss = atBody.replace(selsPlaceHolder, styles);
+								if (styles) {
+									itemCss = atBody.replace(selsPlaceHolder, styles);
+								}
 							} else {
 								itemCss = atBody;
 							}
@@ -175,7 +186,7 @@
 					default:
 						throw item.item.fName() + notSupported;
 				}
-				css += ' ' + itemCss;
+				css += (itemCss ? ' ' + itemCss : '');
 			}
 			return css;
 		};		
@@ -567,6 +578,7 @@
 		var ruleWrapper = function(ruleName, isAddPrefixes, propName, propValueWrapper) {
 			var getRule = function(propValue) {
 				if (propValue) { propValue = propValue.toString(); }
+				if (!propValue) { return ''; }
 				if (propValue.substr(propValue.length - 1 !== ';')) { propValue += ';'; }
 				var ruleDef = propName + ':' + propValue;
 				if (isAddPrefixes) {
