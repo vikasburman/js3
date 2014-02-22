@@ -14,7 +14,7 @@ JS3 Changelog
 * Sample JS3 files (ports of few standard CSS files)
 * API documentation
 
-**0.2.x - &alpha; (22 Feb 2014)**
+**0.2.x - &beta; (22 Feb 2014)**
 
 * Stability, enhancements and completion
 * API standardization
