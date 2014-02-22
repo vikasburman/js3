@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.2.0',
+		VERSION: '0.2.1',
 		COPYRIGHT: 'Copyright (C) 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
