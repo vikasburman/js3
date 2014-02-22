@@ -1,7 +1,7 @@
 /**
   * JS3 Extension - Math for Numeric Declarations and Variables
   * 
-  * Copyright © 2014 Vikas Burman. All rights reserved.
+  * Copyright (C) 2014 Vikas Burman. All rights reserved.
   * 
   * Licensed under the terms of the MIT license. You are free to use 'JS3' under any open source or 
   * commercial project, as long as this copyright header is left intact.

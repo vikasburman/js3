@@ -2,7 +2,7 @@
   * JS3 - JavaScript Style Sheet
   * Instead of putting programming in CSS, it puts CSS in a programming language.
   * 
-  * Copyright © 2014 Vikas Burman. All rights reserved.
+  * Copyright (C) 2014 Vikas Burman. All rights reserved.
   * 
   * Licensed under the terms of the MIT license. You are free to use 'JS3' under any open source or 
   * commercial project, as long as this copyright header is left intact.
@@ -21,7 +21,7 @@
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
 		VERSION: '0.2.0',
-		COPYRIGHT: 'Copyright © 2014 Vikas Burman. All rights reserved.',
+		COPYRIGHT: 'Copyright (C) 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
 	var isArray = function(obj) { return obj && Object.prototype.toString.call(obj) === '[object Array]'; };

@@ -3,7 +3,7 @@
   "title": "JavaScript Style Sheet",
   "version": "0.2.0",
   "author": "Vikas Burman <me@vikasburman.com> (http://www.vikasburman.com)",
-  "copyright": "Copyright © 2014 Vikas Burman. All rights reserved.",
+  "copyright": "Copyright (C) 2014 Vikas Burman. All rights reserved.",
   "description": "JavaScript Style Sheet - Instead of putting programming in CSS, it puts CSS in a programming language.",
   "main": "src/JS3.js",
   "keywords": [
