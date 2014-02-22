@@ -148,8 +148,8 @@ Create your first `.js3` file
 	this
 	
 	// ...
-      
-       // define at-rules
+
+	// define at-rules
         .at('UTF8', 'charset', 'UTF-8')
 	
 }.apply(JS3.css('styles1')));
