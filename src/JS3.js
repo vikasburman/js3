@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.1.3',
+		VERSION: '0.1.4',
 		COPYRIGHT: 'Copyright © 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
@@ -77,7 +77,9 @@
 				index = 0;			
 			for (index = 0; index < styles.length; ++index) {
 				style = styles[index];
-				allStyles += ' ' + style.apply(self);
+				if (style.isOn()) {
+					allStyles += ' ' + style.apply(self);
+				}
 			}
 			return allStyles;
 		};
@@ -102,50 +104,56 @@
 				switch(item.type) {
 					case valueTypes.sel:
 						sel = item.item;
-						selBody = sel.apply(self);
-						styles = selBody.replace(stylesPlaceHolder, generateStyles(sel.styles()));
-						// add scopes, if required
-						if (sel.raw.canBeScoped() && 
-							self.parent.settings.isConsiderScopes && 
-							selectorScopes.length > 0) {
-							for (index2 = 0; index2 < selectorScopes.length; ++index2) {
-								scope = selectorScopes[index2];
-								styles += (scope + ' ' + styles);
+						if (sel.isOn()) {
+							selBody = sel.apply(self);
+							styles = selBody.replace(stylesPlaceHolder, generateStyles(sel.styles()));
+							// add scopes, if required
+							if (sel.raw.canBeScoped() && 
+								self.parent.settings.isConsiderScopes && 
+								selectorScopes.length > 0) {
+								for (index2 = 0; index2 < selectorScopes.length; ++index2) {
+									scope = selectorScopes[index2];
+									styles += (scope + ' ' + styles);
+								}
 							}
+							itemCss = styles;
 						}
-						itemCss = styles;
 						break;
 					case valueTypes.at:
 						at = item.item;
-						atBody = at.apply(self);
-						if (at.raw.canEmbedSels()) {
-							styles = '';
-							selName = '';
-							sels = at.sels.apply(self);
-							for (index2 = 0; index2 < sels.length; ++index2) {
-								selName = sels[index2];
-								if (at.raw.hasSpecialSelectors()) {
-									sel = null;
-									selBody = selName + ' {' + stylesPlaceHolder + '}';
-									styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
-								} else {
-									sel = self.sel[selName];
-									selBody = sel();
-									styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
-									// add scopes, if required
-									if (sel.raw.canBeScoped() && 
-										self.parent.settings.isConsiderScopes && 
-										selectorScopes.length > 0) {
-										for (index3 = 0; index3 < selectorScopes.length; ++index3) {
-											scope = selectorScopes[index3];
-											styles += (scope + ' ' + styles);
+						if (at.isOn()) {
+							atBody = at.apply(self);
+							if (at.raw.canEmbedSels()) {
+								styles = '';
+								selName = '';
+								sels = at.sels.apply(self);
+								for (index2 = 0; index2 < sels.length; ++index2) {
+									selName = sels[index2];
+									if (at.raw.hasSpecialSelectors()) {
+										sel = null;
+										selBody = selName + ' {' + stylesPlaceHolder + '}';
+										styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
+									} else {
+										sel = self.sel[selName];
+										if (sel.isOn()) {
+											selBody = sel();
+											styles += selBody.replace(stylesPlaceHolder, generateStyles(at.styles(selName)));
+											// add scopes, if required
+											if (sel.raw.canBeScoped() && 
+												self.parent.settings.isConsiderScopes && 
+												selectorScopes.length > 0) {
+												for (index3 = 0; index3 < selectorScopes.length; ++index3) {
+													scope = selectorScopes[index3];
+													styles += (scope + ' ' + styles);
+												}
+											}	
 										}
-									}									
+									}
 								}
+								itemCss = atBody.replace(selsPlaceHolder, styles);
+							} else {
+								itemCss = atBody;
 							}
-							itemCss = atBody.replace(selsPlaceHolder, styles);
-						} else {
-							itemCss = atBody;
 						}
 						break;
 					case valueTypes.decl:
@@ -229,6 +237,15 @@
 				self.reload();
 			}	
 		};
+		var statusChanged = function(type, name, oldValue, newValue) {
+			isDirty = true;
+			if (isLoaded && self.parent.settings.isLogChanges) {
+				window.console.log('Inclusion status of ' + type + ' "' + name + '" is changed from "' + oldValue + '" to "' + newValue + '".');
+			}
+			if (isLoaded && self.parent.settings.isReloadOnChange) {
+				self.reload();
+			}	
+		};		
 		var varValueWrapperFunc = function(varValueOrFunc) {
 			var getValue = function() { return null; };
 			if (varValueOrFunc) {
@@ -479,9 +496,23 @@
 				return getRule(propValueWrapper());
 			};
 			var ruleId = randomName();
+			var isOn = true;
 			wrapper.id = function() { return ruleId; };			
 			wrapper.type = function() { return valueTypes.rule; };
 			wrapper.fName = function() { return ruleName; };
+			wrapper.off = function() { 
+				if (isOn) {
+					isOn = false;
+					statusChanged(valueTypes.rule, ruleName, 'on', 'off');
+				}
+			};
+			wrapper.on = function() { 
+				if (!isOn) {
+					isOn = true;
+					statusChanged(valueTypes.rule, ruleName, 'off', 'on');
+				}			
+			};
+			wrapper.isOn = function() { return isOn; };			
 			wrapper.raw = {};
 			wrapper.raw.property = function() { return propName; };
 			wrapper.raw.value = function() { return propValueWrapper.plain(); };
@@ -495,13 +526,15 @@
 			return wrapper;
 		};
 		var styleWrapper = function(styleName, styleValueWrapper) {
-			var getStyles = function(props) { 
+			var getStyles = function(rules) { 
 				var theStyles = '';
 				var index = 0;
-				var prop = null;
-				for (index = 0; index < props.length; ++index) {
-					prop = props[index];
-					theStyles += prop.apply(self);
+				var rule = null;
+				for (index = 0; index < rules.length; ++index) {
+					rule = rules[index];
+					if (rule.isOn()) {
+						theStyles += rule.apply(self);
+					}
 				}
 				return theStyles;
 			};				
@@ -515,9 +548,23 @@
 				return getStyles(styleValueWrapper());
 			};
 			var styleId = randomName();
+			var isOn = true;
 			wrapper.id = function() { return styleId; };
 			wrapper.type = function() { return valueTypes.style; };
 			wrapper.fName = function() { return styleName; };
+			wrapper.off = function() { 
+				if (isOn) {
+					isOn = false;
+					statusChanged(valueTypes.style, styleName, 'on', 'off');
+				}
+			};
+			wrapper.on = function() { 
+				if (!isOn) {
+					isOn = true;
+					statusChanged(valueTypes.style, styleName, 'off', 'on');
+				}			
+			};
+			wrapper.isOn = function() { return isOn; };			
 			wrapper.rules = function() { return styleValueWrapper.plain(); };
 			wrapper.rules.add = function(newRules, isInsertOnTop) {
 				var processedRuleArray = styleValueWrapper.plain();
@@ -579,9 +626,23 @@
 			};
 			var selId = randomName();
 			var styles = [];
+			var isOn = true;
 			wrapper.id = function() { return selId; };
 			wrapper.type = function() { return valueTypes.sel; };
 			wrapper.fName = function() { return selName; };
+			wrapper.off = function() { 
+				if (isOn) {
+					isOn = false;
+					statusChanged(valueTypes.sel, selName, 'on', 'off');
+				}
+			};
+			wrapper.on = function() { 
+				if (!isOn) {
+					isOn = true;
+					statusChanged(valueTypes.sel, selName, 'off', 'on');
+				}			
+			};
+			wrapper.isOn = function() { return isOn; };
 			wrapper.styles = function() { return styles; };
 			wrapper.styles.value = function() { return generateStyles(wrapper.styles()); };
 			wrapper.styles.add = function(newStyles) {
@@ -643,9 +704,23 @@
 			};
 			var atId = randomName();
 			var groupedStyles = {};
+			var isOn = true;
 			wrapper.id = function() { return atId; };
 			wrapper.type = function() { return valueTypes.at; };
 			wrapper.fName = function() { return atName; };
+			wrapper.off = function() { 
+				if (isOn) {
+					isOn = false;
+					statusChanged(valueTypes.at, atName, 'on', 'off');
+				}
+			};
+			wrapper.on = function() { 
+				if (!isOn) {
+					isOn = true;
+					statusChanged(valueTypes.at, atName, 'off', 'on');
+				}			
+			};
+			wrapper.isOn = function() { return isOn; };
 			if (canEmbedSels) {
 				wrapper.sels = function() { 
 					var sels = [];
