@@ -212,7 +212,6 @@
 		};
 		
 		// definition
-
 		var stylesAdded = function(count, type, to) {
 			isDirty = true;
 			if (isLoaded && self.parent.settings.isLogChanges) {
@@ -220,7 +219,10 @@
 			}
 			if (isLoaded && self.parent.settings.isReloadOnChange) {
 				self.reload();
-			}			
+				if (self.parent.settings.isRaiseOnChange) {
+					self.parent.onChange.raise({css:self, type:'stylesAdded'});
+				}
+			}
 		};
 		var styleRemoved = function(name, type, from) {
 			isDirty = true;
@@ -229,6 +231,9 @@
 			}
 			if (isLoaded && self.parent.settings.isReloadOnChange) {
 				self.reload();
+				if (self.parent.settings.isRaiseOnChange) {
+					self.parent.onChange.raise({css:self, type:'styleRemoved'});
+				}				
 			}			
 		};
 		var valueChanged = function(type, name, oldValue, newValue) {
@@ -238,6 +243,9 @@
 			}
 			if (isLoaded && self.parent.settings.isReloadOnChange) {
 				self.reload();
+				if (self.parent.settings.isRaiseOnChange) {
+					self.parent.onChange.raise({css:self, type:'valueChanged'});
+				}					
 			}	
 		};
 		var statusChanged = function(type, name, oldValue, newValue) {
@@ -1156,6 +1164,36 @@
 					}
 				}
 			}		
+		};
+		
+		// event
+		var allHandlers = [];
+		core.onChange = function(handlerName, handler) {
+			var index = 0;
+			var foundAt = -1;
+			for (index = 0; index < allHandlers.length; ++index) {
+				if (allHandlers[index].name === handlerName) { 
+					foundAt = index;
+					break;
+				}
+			}
+			if (isFunction(handler)) {
+				if (foundAt === -1) {
+					allHandlers.push({name: handlerName, handler: handler});
+				} else {
+					allHandlers[foundAt].handler = handler;
+				}
+			} else {
+				if (foundAt !== -1) {
+					allHandlers.splice(foundAt, 1); // remove
+				}
+			}
+		};
+		core.onChange.raise = function(e) {
+			var index = 0;
+			for (index = 0; index < allHandlers.length; ++index) {
+				allHandlers[index].handler(e); // call
+			}
 		};
 		
 		// changes

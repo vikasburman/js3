@@ -212,7 +212,6 @@
 		};
 		
 		// definition
-
 		var stylesAdded = function(count, type, to) {
 			isDirty = true;
 			if (isLoaded && self.parent.settings.isLogChanges) {
@@ -220,7 +219,10 @@
 			}
 			if (isLoaded && self.parent.settings.isReloadOnChange) {
 				self.reload();
-			}			
+				if (self.parent.settings.isRaiseOnChange) {
+					self.parent.onChange.raise({css:self, type:'stylesAdded'});
+				}
+			}
 		};
 		var styleRemoved = function(name, type, from) {
 			isDirty = true;
@@ -229,6 +231,9 @@
 			}
 			if (isLoaded && self.parent.settings.isReloadOnChange) {
 				self.reload();
+				if (self.parent.settings.isRaiseOnChange) {
+					self.parent.onChange.raise({css:self, type:'styleRemoved'});
+				}				
 			}			
 		};
 		var valueChanged = function(type, name, oldValue, newValue) {
@@ -238,6 +243,9 @@
 			}
 			if (isLoaded && self.parent.settings.isReloadOnChange) {
 				self.reload();
+				if (self.parent.settings.isRaiseOnChange) {
+					self.parent.onChange.raise({css:self, type:'valueChanged'});
+				}					
 			}	
 		};
 		var statusChanged = function(type, name, oldValue, newValue) {
@@ -493,9 +501,25 @@
 				return pfxValueWrapper();
 			};
 			var pfxId = randomName();
+			var isOn = true;
 			wrapper.id = function() { return pfxId; };				
 			wrapper.type = function() { return valueTypes.pfx; };
 			wrapper.fName = function() { return pfxName; };
+			wrapper.off = function() { 
+				if (isOn) {
+					isOn = false;
+					allPfxCache = null; // so that cache is created a fresh
+					statusChanged(valueTypes.pfx, pfxName, 'on', 'off');
+				}
+			};
+			wrapper.on = function() { 
+				if (!isOn) {
+					isOn = true;
+					allPfxCache = null; // so that cache is created a fresh
+					statusChanged(valueTypes.pfx, pfxName, 'off', 'on');
+				}			
+			};
+			wrapper.isOn = function() { return isOn; };					
 			wrapper.raw = {};
 			wrapper.raw.value = function() { return pfxValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
@@ -529,11 +553,13 @@
 				if (isAddPrefixes) {
 					if (!allPfxCache) {
 						var pfx = null;
+						var pfxName = '';
 						allPfxCache = [];
-						for(pfx in self.pfx) {
-							if (self.pfx.hasOwnProperty(pfx)) {
-								if (isFunction(self.pfx[pfx].type)) {
-									allPfxCache.push(self.pfx[pfx].apply(self));
+						for(pfxName in self.pfx) {
+							if (self.pfx.hasOwnProperty(pfxName)) {
+								pfx = self.pfx[pfxName];
+								if (isFunction(pfx.type) && pfx.isOn()) {
+									allPfxCache.push(pfx.apply(self));
 								}
 							}
 						}
@@ -1138,6 +1164,36 @@
 					}
 				}
 			}		
+		};
+		
+		// event
+		var allHandlers = [];
+		core.onChange = function(handlerName, handler) {
+			var index = 0;
+			var foundAt = -1;
+			for (index = 0; index < allHandlers.length; ++index) {
+				if (allHandlers[index].name === handlerName) { 
+					foundAt = index;
+					break;
+				}
+			}
+			if (isFunction(handler)) {
+				if (foundAt === -1) {
+					allHandlers.push({name: handlerName, handler: handler});
+				} else {
+					allHandlers[foundAt].handler = handler;
+				}
+			} else {
+				if (foundAt !== -1) {
+					allHandlers.splice(foundAt, 1); // remove
+				}
+			}
+		};
+		core.onChange.raise = function(e) {
+			var index = 0;
+			for (index = 0; index < allHandlers.length; ++index) {
+				allHandlers[index].handler(e); // call
+			}
 		};
 		
 		// changes
