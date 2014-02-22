@@ -150,12 +150,12 @@ Create your first `.js3` file
 	// ...
 
 	// define at-rules
-        .at('UTF8', 'charset', 'UTF-8')
+	.at('UTF8', 'charset', 'UTF-8')
 	
 }.apply(JS3.css('styles1')));
 ```
 
-> G: Once all definitions are done, start building up the stylesheet:
+> G: Once all definitions are done, start building up the stylesheet by applying styles to selectors, at-rules, etc.
 
 ```javascript
 (function() { 
@@ -180,9 +180,9 @@ Create your first `.js3` file
 	)
 }.apply(JS3.css('styles1')));
 ```
-**Note, how styles defined once are being reused with multiple selectors. Also note how less used styles can be defined in-place without the need of defining it as named style.**
+**Note, how styles defined once, are being reused with multiple selectors. Also note how less used styles can be defined in-place without the need of defining them as named styles.**
 
-> H: Once everything is done, mark for it:
+> H: Once everything is done, mark closure:
 
 ```javascript
 (function() { 
@@ -194,8 +194,9 @@ Create your first `.js3` file
 	.end(); 
 }.apply(JS3.css('styles1')));
 ```
+**Note the use of `;` here stops further chaining of calls.
 
-> I: Here is how complete `.js3` file looks like:
+> I: Here is how complete `.js3` file looks like. Once this is loaded these styles will be available through `JS3.styles1` object (because the name we used here is `styles1`):
 
 ```javascript
 (function() { 
