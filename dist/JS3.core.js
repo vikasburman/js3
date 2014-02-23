@@ -1164,35 +1164,35 @@
 		
 		// extensions
 		var allEx = {};
-		core.ex = function(exName, targetValueTypes, targetValueDataType, targetType, classFunc) {
+		core.ex = function(exName, targetFilter, exProcessor) {
 			if (!core.settings.isLoadExtensions) { return; }
+			if (!targetFilter.objectType) { targetFilter.objectType = ['prefix', 'variable', 'rule', 'style', 'selector', 'at', 'decl']; }
+			if (!targetFilter.dataType) { targetFilter.dataType = ''; }
+			if (!targetFilter.type) { targetFilter.type = ''; }
+			
 			// add if not already added
-			if (!targetValueDataType) { targetValueDataType = ''; }
-			if (targetValueDataType === '*') { targetValueDataType = ''; }
-			if (!targetType) { targetType = ''; }
-			if (targetType === '*') { targetType = ''; }
-			targetValueTypes = (isArray(targetValueTypes) ? targetValueTypes : [targetValueTypes]);
+			targetFilter.objectType = (isArray(targetFilter.objectType) ? targetFilter.objectType : [targetFilter.objectType]);
 			var index = 0,
-				targetValueType = '',
+				objectType = '',
 				fullName = '';
-			for (index = 0; index < targetValueTypes.length; ++index) {
-				targetValueType = targetValueTypes[index];
-				fullName = '_' + targetValueType + '_' + targetValueDataType + '_' + targetType + '_' + exName;
+			for (index = 0; index < targetFilter.objectType.length; ++index) {
+				objectType = targetFilter.objectType[index];
+				fullName = '_' + objectType + '_' + targetFilter.dataType + '_' + targetFilter.type + '_' + exName;
 				if (allEx[fullName]) { throw 'Extension "' + exName + '" is already loaded.'; }
-				allEx[fullName] = {exName: exName, targetValueType: targetValueType, targetValueDataType: targetValueDataType, targetType: targetType, classFunc: classFunc};
-			}			
+				allEx[fullName] = {exName: exName, targetFilter: targetFilter, exProcessor: exProcessor};
+			}
 		};
-		core.ex.me = function(css, wrapper, valueObjectType, valueObjectDataType, valueType) {
+		core.ex.me = function(css, wrapper, objectType, dataType, type) {
 			var ex = null,
 				property = null;
 			wrapper.parent = wrapper.parent || css;
 			for (property in allEx) {
 				if (allEx.hasOwnProperty(property)) {
 					ex = allEx[property];
-					if (ex.targetValueType === valueObjectType &&
-						(ex.targetValueDataType === valueObjectDataType || ex.targetValueDataType === '') &&
-						(ex.targetType === valueType || ex.targetType === '')) {
-						ex.classFunc(wrapper); // let it add on to wrapper as required
+					if (ex.targetFilter.objectType.indexOf(objectType) !== -1 &&
+					   (ex.targetFilter.dataType === dataType || ex.targetFilter.dataType === '') &&
+					   (ex.targetFilter.type === type || ex.targetFilter.type === '')) {
+						ex.exProcessor(wrapper); // let it add on to wrapper as required
 					}
 				}
 			}		
