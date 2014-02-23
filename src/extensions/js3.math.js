@@ -10,6 +10,8 @@
   *     License: https://raw.github.com/vikasburman/js3/master/LICENSE.md
   *  Commercial: http://www.vikasburman.com/js3
   */
+/*jslint indent: 4, maxerr: 50, white: true, vars: true, unparam: true, plusplus: true, bitwise: true */
+/*global window, JS3 */   
 (function() {
 	"use strict";
 	JS3.ex('math', {objectType: ['variable', 'rule'], dataType: 'number'}, function(wrapper) {

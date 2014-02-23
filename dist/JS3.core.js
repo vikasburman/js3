@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.2.1',
+		VERSION: '0.3.6',
 		COPYRIGHT: 'Copyright (C) 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
@@ -38,7 +38,7 @@
 			invalidArgument = 'invalid argument',
 			alreadyDefined = ' already defined',
 			notSupported = ' cannot be applied',
-			allItems = [], // {type: 'at'|'sel'|'decl', item: atObject|selObject|declaration}
+			allItems = [], // {type: 'at'|'sel'|'dir', item: atObject|selObject|direct}
 			allPfxCache = null,
 			id = '',
 			isLoaded = false,
@@ -55,7 +55,7 @@
 			style: 'style',
 			sel: 'selector',
 			at: 'at',
-			decl: 'decl'
+			dir: 'dir'
 		};
 		var atRules = {
 			cs: 'charset',
@@ -180,7 +180,7 @@
 							}
 						}
 						break;
-					case valueTypes.decl:
+					case valueTypes.dir:
 						itemCss = (typeof item.item === 'string' ? item.item : item.item.apply(self));
 						break;
 					default:
@@ -1021,26 +1021,26 @@
 		};
 		
 		// append in style sheet
-		self.write = function(selOrAtOrDeclStringOrFunc, StylesOrGroupedStylesOrNone) {
+		self.write = function(selOrAtOrDirStringOrFunc, StylesOrGroupedStylesOrNone) {
 			var targetType = '';
-			if (typeof selOrAtOrDeclStringOrFunc === 'string' || (isFunction(selOrAtOrDeclStringOrFunc) && !selOrAtOrDeclStringOrFunc.type)) {
-				targetType = valueTypes.decl;
+			if (typeof selOrAtOrDirStringOrFunc === 'string' || (isFunction(selOrAtOrDirStringOrFunc) && !selOrAtOrDirStringOrFunc.type)) {
+				targetType = valueTypes.dir;
 			} else {
-				targetType = selOrAtOrDeclStringOrFunc.type();
+				targetType = selOrAtOrDirStringOrFunc.type();
 			}
 			switch(targetType) {
 				case valueTypes.sel:
-					allItems.push({type: valueTypes.sel, item:selOrAtOrDeclStringOrFunc});
-					selOrAtOrDeclStringOrFunc.styles.add(StylesOrGroupedStylesOrNone);
+					allItems.push({type: valueTypes.sel, item:selOrAtOrDirStringOrFunc});
+					selOrAtOrDirStringOrFunc.styles.add(StylesOrGroupedStylesOrNone);
 					break;
 				case valueTypes.at:
-					allItems.push({type: valueTypes.at, item:selOrAtOrDeclStringOrFunc});
-					if (selOrAtOrDeclStringOrFunc.raw.canEmbedSels()) {
-						selOrAtOrDeclStringOrFunc.sels.define(StylesOrGroupedStylesOrNone);
+					allItems.push({type: valueTypes.at, item:selOrAtOrDirStringOrFunc});
+					if (selOrAtOrDirStringOrFunc.raw.canEmbedSels()) {
+						selOrAtOrDirStringOrFunc.sels.define(StylesOrGroupedStylesOrNone);
 					}
 					break;
-				case valueTypes.decl:
-					allItems.push({type: valueTypes.decl, item:selOrAtOrDeclStringOrFunc});
+				case valueTypes.dir:
+					allItems.push({type: valueTypes.dir, item:selOrAtOrDirStringOrFunc});
 					break;
 				default:
 					throw invalidArgument;
@@ -1083,7 +1083,7 @@
 		self.reload = function(isForceReload) { 
 			if ((((isDirty && !isDone) || (isDirty && isDone && isLoadAfterDone)) && !self.parent.state.isUpdatesSuspended) || isForceReload) { 
 				loadCSS(); 
-				if (xref) { self.parent.reload.dependents(fileName); }
+				if (xref) { self.parent.reload.dependents(fileName, isForceReload); }
 			}
 		};
 		self.unload = function() { 
@@ -1166,7 +1166,7 @@
 		var allEx = {};
 		core.ex = function(exName, targetFilter, exProcessor) {
 			if (!core.settings.isLoadExtensions) { return; }
-			if (!targetFilter.objectType) { targetFilter.objectType = ['prefix', 'variable', 'rule', 'style', 'selector', 'at', 'decl']; }
+			if (!targetFilter.objectType) { targetFilter.objectType = ['prefix', 'variable', 'rule', 'style', 'selector', 'at', 'direct']; }
 			if (!targetFilter.dataType) { targetFilter.dataType = ''; }
 			if (!targetFilter.type) { targetFilter.type = ''; }
 			
@@ -1178,7 +1178,7 @@
 			for (index = 0; index < targetFilter.objectType.length; ++index) {
 				objectType = targetFilter.objectType[index];
 				fullName = '_' + objectType + '_' + targetFilter.dataType + '_' + targetFilter.type + '_' + exName;
-				if (allEx[fullName]) { throw 'Extension "' + exName + '" is already loaded.'; }
+				if (allEx[fullName]) { throw 'Extension "' + exName + '" for given contents "' + fullName + '" is already loaded.'; }
 				allEx[fullName] = {exName: exName, targetFilter: targetFilter, exProcessor: exProcessor};
 			}
 		};
@@ -1281,7 +1281,7 @@
 				css.reload(isForceReload);
 			}			
 		};
-		core.reload.dependents = function(ofFileName) {
+		core.reload.dependents = function(ofFileName, isForceReload) {
 			var dependentFiles = (xref[ofFileName] || []);
 			var index = 0;
 			var dependentFile = '';
@@ -1289,7 +1289,7 @@
 			for (index = 0; index < dependentFiles.length; ++index) {
 				dependentFile = dependentFiles[index];
 				css = core[dependentFile];
-				if (css) { css.reload(); }
+				if (css) { css.reload(isForceReload); }
 			}
 		};
 		core.remove = {};
@@ -1318,4 +1318,15 @@
 	
 	//// Public ////
 	window.JS3 = new JS3();
+	
+	// update internal default settings with globally available settings
+	if (window.JS3Settings && isLiteral(window.JS3Settings)) {
+		var property = '';
+		for (property in window.JS3Settings) {
+			if (window.JS3Settings.hasOwnProperty(property) && window.JS3.settings[property]) {
+				window.JS3.settings[property] = window.JS3Settings[property];
+			}
+		}
+		delete window.JS3Settings; // clear it
+	}
 }());

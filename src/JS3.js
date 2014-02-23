@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.2.1',
+		VERSION: '0.3.6',
 		COPYRIGHT: 'Copyright (C) 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
@@ -1164,7 +1164,6 @@
 		
 		// extensions
 		var allEx = {};
-		var allExList = [];
 		core.ex = function(exName, targetFilter, exProcessor) {
 			if (!core.settings.isLoadExtensions) { return; }
 			if (!targetFilter.objectType) { targetFilter.objectType = ['prefix', 'variable', 'rule', 'style', 'selector', 'at', 'direct']; }
@@ -1328,6 +1327,6 @@
 				window.JS3.settings[property] = window.JS3Settings[property];
 			}
 		}
-		delete window['JS3Settings']; // clear it
+		delete window.JS3Settings; // clear it
 	}
 }());
