@@ -203,14 +203,14 @@ Supply a working sample against the enhancement.
 Similar Projects
 ---
 
-There are several projects which are on similar lines, i.e., CSS and JavaScript together. However none of below mentioned, do it in totality and provide an end-to-end seamless experience for stylesheet processing.
+There are several projects which are on similar lines, i.e., CSS and JavaScript together. However unlike JS3, none of below mentioned, do it in totality and provide an end-to-end seamless experience for stylesheet processing.
 
 * [1996's W3.org proposal of JSSS](http://www.w3.org/Submission/1996/1/WD-jsss-960822)
 * [1997's Netscape attempt of bringing CSS together with JavaScript](http://sunsite.uakom.sk/sunworldonline/swol-04-1997/swol-04-webmaster.html)
 * [David Walsh's trick for directly playing with style DOM element to update stylesheet](http://davidwalsh.name/add-rules-stylesheets)
 * [Jason Graves' approach to modify styles as well as cascading from style islands/blocks or externally linked css files using Javascript](http://glm-jss.sourceforge.net/)
 
-*If you find something else that is coming up on similar lines, please share your findings and I will incorporate it here for everyone else's reference.*
+*If you find something else that is coming up on similar lines, please share your findings and I will incorporate it here for everyone's reference.*
 
 License
 ---
