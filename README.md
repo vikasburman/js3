@@ -70,137 +70,7 @@ That's all is needed to start using the power of JS3.
 
 Create your first `.js3` file
 ---
-
-> A: The empty `.js3` file looks as below. Note that this is defining a new CSS object using `JS3.css(<objectName>)` call and passing the resulting new css object as `this` context here:
-
-```javascript
-(function() { 
-
-// style definitions in javascript notations will come here
-
-}.apply(JS3.css('styles1')));
-```
-
-> B: Define variables that you may want to change later or may want to share across different files:
-
-```javascript
-(function() { 
-	this
-	
-	// define variables
-	.vars('backgroundColor', 'yellow') 
-
-}.apply(JS3.css('styles1')));
-```
-**Note the use of `this` and absence of a `;` at the end of variable definition. It helps in chaining the calls together.**
-
-> C: Define named style rules that you may want to re-use in multiple styles or change later or share across different files:
-
-```javascript
-(function() { 
-	this
-	
-	// ...
-
-	// define named rules
-	.rules('allPadding', 'padding', 100, 'px !important')
-	.rules('textColor', 'color', 'red')
-
-}.apply(JS3.css('styles1')));
-```
-
-> D: Define named styles (i.e., a collection of style rules) that you may want to apply on multiple selectors or change later or share across different files:
-
-```javascript
-(function() { 
-	this
-	
-	// ...
-
-	// define named styles
-	.styles('basic', [
-		this.rules.allPadding,
-		this.rule('background-color', this.vars.backgroundColor) 
-	])
-	.styles('basicEx', this.rules.textColor)
-
-}.apply(JS3.css('styles1')));
-```
-
-**Note the in-place definition of a style inside style definition itself. As not every rule needs to be a named rule when there is a limited use of it. Also note the use of the variable in the style rule.**
-
-> E: Define named selectors to identify various regions of your page for easy styling. Like everything else, these can also be changed or shared across files:
-
-```javascript
-(function() { 
-	this
-	
-	// ...
-
-	// define selectors
-	.sel('Everywhere', 'body')
-	.sel('MainArea', '#d1')
-	.sel('Widgets', ['#d2', '#d3'])
-	
-}.apply(JS3.css('styles1')));
-```
-
-> F: Define any at-rules. These can also be changed or shared across files:
-
-```javascript
-(function() { 
-	this
-	
-	// ...
-
-	// define at-rules
-	.at('UTF8', 'charset', 'UTF-8')
-	
-}.apply(JS3.css('styles1')));
-```
-
-> G: Once all definitions are done, start building up the stylesheet by applying styles to selectors, and at-rules, etc.
-
-```javascript
-(function() { 
-	this
-	
-	// ...
-
-	// write styles
-	.write(this.at.UTF8)
-	.write(this.sel.Everywhere, [
-		this.styles.basic,
-		this.styles.basicEx
-	])
-
-	.write(this.sel.Widgets, this.styles.basic)
-	
-	.write(this.sel.MainArea, 
-		this.style([
-			this.rule('text-align', 'right'),
-			this.rule('letter-spacing', 5, 'px')
-		])
-	)
-}.apply(JS3.css('styles1')));
-```
-**Note, how styles that are defined once are being reused with multiple selectors. Also note, how styles can be defined in-place instead of being defined as named styles.**
-
-> H: Once everything is done, mark closure of it using `end()`:
-
-```javascript
-(function() { 
-	this
-	
-	// ...
-
-	// done
-	.end(); 
-}.apply(JS3.css('styles1')));
-```
-**Note the use of `;` after `end()`. This stops further chaining of calls.**
-
-> I: Here is how complete `styles1.js3` file looks like. Once this is loaded, all these styles will be available through `JS3.styles1` object:
+Creating a `.js3` file is simply writing bunch of javascript code lines. Each `js3` file resides in its own closure and gets loaded (read attached) on global `JS3` object by its name. Here is a quick example:
 
 ```javascript
 (function() { 
@@ -211,43 +81,26 @@ Create your first `.js3` file
 
 	// define named rules
 	.rules('allPadding', 'padding', 100, 'px !important')
-	.rules('textColor', 'color', 'red')
 	
 	// define named styles
 	.styles('basic', [
-		this.rules.allPadding,
-		this.rule('background-color', this.vars.backgroundColor) 
+		this.rules.allPadding
 	])
-	.styles('basicEx', this.rules.textColor)
 	
 	// define selectors
 	.sel('Everywhere', 'body')
-	.sel('MainArea', '#d1')
-	.sel('Widgets', ['#d1', '#d2'])
 	
-	// define at-rules
-	.at('UTF8', 'charset', 'UTF-8')
-
 	// write styles
-	.write(this.at.UTF8)
 	.write(this.sel.Everywhere, [
-		this.styles.basic,
-		this.styles.basicEx
+		this.styles.basic
 	])
-
-	.write(this.sel.Widgets, this.styles.basic)
-	
-	.write(this.sel.MainArea, 
-		this.style([
-			this.rule('text-align', 'right'),
-			this.rule('letter-spacing', 5, 'px')
-		])
-	)
 
 	// done
 	.end(); 
 }.apply(JS3.css('styles1')));
 ```
+
+Checkout the guide for [creating your first `.js3` file](https://github.com/vikasburman/js3/wiki/Creating-your-first-js3-file) for a detailed and step-by-step rundown of key concepts shown here.
 
 Using the power of JS3
 ---
