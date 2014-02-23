@@ -38,7 +38,7 @@ Getting Started
 
 **1. Install**
 
-Install using `bower install JS3` or download [latest release](https://github.com/vikasburman/js3/releases).
+Install using `bower install JS3` or download [latest release](https://github.com/vikasburman/js3/releases). All you need is to have `JS3.min.js` available, choose however you want to get it.
 
 **2. Include**
 
