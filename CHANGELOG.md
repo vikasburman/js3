@@ -4,17 +4,17 @@ JS3 Changelog
 ##### 0.4.x - &beta; (Future)
 
 * Issue fixes
-* Rich extensions
+* Property specific extensions
 * CSS to JS3 porting for an easy switch to JS3 for existing work
+* Sample JS3 files (ports of few standard CSS files)
 
 ##### 0.3.x - &beta; (Next)
 
-* Property specific extensions
-* Full-fledged running example
-* Sample JS3 files (ports of few standard CSS files)
 * API documentation
+* Minor API enhancements
+* Full-fledged running example (Basic)
 
-##### 0.2.x - &beta; (22 Feb 2014)
+##### 0.2.1 - &beta; (22 Feb 2014)
 
 * Stability, enhancements and completion
 * API standardization

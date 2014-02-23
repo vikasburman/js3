@@ -1112,7 +1112,7 @@
 		
 		// settings
 		core.settings = {};
-		core.settings.isLogChanges = true;
+		core.settings.isLogChanges = false;
 		core.settings.isLoadExtensions = true;
 		core.settings.isReloadOnChange = true;
 		core.settings.isConsiderScopes = true;
@@ -1236,6 +1236,9 @@
 		core.suspendUpdates = function() { 
 			core.state.isUpdatesSuspended = true; 
 		};
+		core.isUpdatesSuspended = function() { 
+			return core.state.isUpdatesSuspended;
+		};
 		core.resumeUpdates = function() { 
 			core.state.isUpdatesSuspended = false;
 			core.reload.all(); // without force
@@ -1291,7 +1294,7 @@
 		};
 		core.remove = {};
 		core.remove.all = function() {
-			core.unloadAll();
+			core.unload.all();
 			var index = 0;
 			var css = null;
 			for (index = 0; index < allFiles.length; ++index) {
