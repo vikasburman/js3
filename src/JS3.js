@@ -28,7 +28,7 @@
 	var isFunction = function(obj) { return obj && typeof obj === 'function'; };
 	var isLiteral = function(obj) { return obj && Object.prototype.toString.call(obj) === '[object Object]'; };
 	
-	var CSS = function(core, fileName) {
+	var CSS = function(core, objectName) {
 		var self = this;
 		
 		// generation
@@ -83,7 +83,7 @@
 			var S4 = function() { return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1); };
 			return ("_" + S4() + S4() + '_' + S4() + '_' + S4() + '_' + S4() + '_' + S4() + S4() + S4());		
 		};
-		var getNewId = function() { return 'js3_' + fileName + randomName(); };
+		var getNewId = function() { return 'js3_' + objectName + randomName(); };
 		var newLine = function() { return (self.parent.settings.isGeneratePrettyCSS ? '\n' : ''); };
 		var tab = function() { return (self.parent.settings.isGeneratePrettyCSS ? '\t' : ''); };
 		var generateStyles = function(styles) {
@@ -188,7 +188,7 @@
 					default:
 						throw item.item.fName() + notSupported;
 				}
-				css += (itemCss ? itemCss : '');
+				css += (itemCss || '');
 			}
 			return css;
 		};		
@@ -935,7 +935,7 @@
 		// definitions
 		self.xref = function() {
 			if (arguments.length > 0) { 
-				self.parent.xref(fileName, Array.prototype.slice.call(arguments, 0)); 
+				self.parent.xref(objectName, Array.prototype.slice.call(arguments, 0)); 
 				xref = true;
 			}
 			return self;
@@ -1015,10 +1015,10 @@
 			self.styles[name] = styleWrapper(name, styleValueWrapperFunc(ruleArrayOrRuleArrayFuncOrCondFunc, ruleArrayOrRuleLiteral));
 			return self;
 		};
-		self.at = function(name, atRule, valueOrQueryOrStylesOrNone) {
+		self.at = function(name, atRule, atRuleQueryOrIdentifierOrFunc) {
 			if (self.at[name]) { throw name + alreadyDefined; }
-			var valueOrQuery = valueOrQueryOrStylesOrNone || '';
-			self.at[name] = atWrapper(name, atRule, atValueWrapperFunc(valueOrQuery)); 
+			atRuleQueryOrIdentifierOrFunc = atRuleQueryOrIdentifierOrFunc || '';
+			self.at[name] = atWrapper(name, atRule, atValueWrapperFunc(atRuleQueryOrIdentifierOrFunc)); 
 			return self;			
 		};
 		
@@ -1081,23 +1081,23 @@
 		self.parent = core;
 		self.id = function() { return id; };
 		self.isChanged = function() { return isDirty; };
-		self.name = function() { return fileName; };
+		self.name = function() { return objectName; };
 		self.reload = function(isForceReload) { 
 			if ((((isDirty && !isDone) || (isDirty && isDone && isLoadAfterDone)) && !self.parent.state.isUpdatesSuspended) || isForceReload) { 
 				loadCSS(); 
-				if (xref) { self.parent.reload.dependents(fileName, isForceReload); }
+				if (xref) { self.parent.reload.dependents(objectName, isForceReload); }
 			}
 		};
 		self.unload = function() { 
 			if (isLoaded) { 
 				unloadCSS(); 
-				if (xref) { self.parent.unload.dependents(fileName); }
+				if (xref) { self.parent.unload.dependents(objectName); }
 			}
 		};
 		self.remove = function() {
 			self.unload();
 			self.parent.css.remove(self.name());
-			if (xref) { self.parent.remove.dependents(fileName); }
+			if (xref) { self.parent.remove.dependents(objectName); }
 		};
 	};
 	var JS3 = function() {
@@ -1143,24 +1143,22 @@
 		};
 		
 		// definition
-		core.css = function(fileName) {
-			if (!fileName) { throw 'CSS filename must be defined.'; }
-			if (core[fileName]) { throw 'CSS file "' + fileName + '" is already loaded.'; }
-			var myCSS = new CSS(core, fileName);
-			core[fileName] = myCSS;
+		core.css = function(objectName) {
+			if (core[objectName]) { throw objectName + ' is already loaded.'; }
+			var myCSS = new CSS(core, objectName);
+			core[objectName] = myCSS;
 			allFiles.push(myCSS);
 			return myCSS;
 		};
-		core.css.remove = function(fileName) {
-			if (!fileName) { throw 'CSS filename must be defined.'; }
-			if (!core[fileName]) { throw 'CSS file "' + fileName + '" is not loaded.'; }
-			delete core[fileName];
+		core.css.remove = function(objectName) {
+			if (!core[objectName]) { return; }
+			delete core[objectName];
 			var index = 0;
 			var css = null;
 			var foundAt = -1;
 			for (index = 0; index < allFiles.length; ++index) {
 				css = allFiles[index];
-				if (css.name() === fileName) { foundAt = index; break; }
+				if (css.name() === objectName) { foundAt = index; break; }
 			}
 			if (foundAt !== -1) { allFiles.splice(foundAt, 1); }
 		};
@@ -1264,8 +1262,8 @@
 				css.unload();
 			}			
 		};
-		core.unload.dependents = function(ofFileName) {
-			var dependentFiles = (xref[ofFileName] || []);
+		core.unload.dependents = function(ofObjectName) {
+			var dependentFiles = (xref[ofObjectName] || []);
 			var index = 0;
 			var dependentFile = '';
 			var css = null;
@@ -1284,8 +1282,8 @@
 				css.reload(isForceReload);
 			}			
 		};
-		core.reload.dependents = function(ofFileName, isForceReload) {
-			var dependentFiles = (xref[ofFileName] || []);
+		core.reload.dependents = function(ofObjectName, isForceReload) {
+			var dependentFiles = (xref[ofObjectName] || []);
 			var index = 0;
 			var dependentFile = '';
 			var css = null;
@@ -1306,8 +1304,8 @@
 			}
 			allFiles = [];
 		};
-		core.remove.dependents = function(ofFileName) {
-			var dependentFiles = (xref[ofFileName] || []);
+		core.remove.dependents = function(ofObjectName) {
+			var dependentFiles = (xref[ofObjectName] || []);
 			var index = 0;
 			var dependentFile = '';
 			var css = null;
