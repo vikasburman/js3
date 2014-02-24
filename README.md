@@ -101,7 +101,7 @@ Creating a `.js3` file is simply writing bunch of javascript code lines. Each `j
 }.apply(JS3.css('styles1')));
 ```
 
-Check [creating your first `.js3` file](https://github.com/vikasburman/js3/wiki/Creating-your-first-js3-file) guide for  detailed and step-by-step rundown of key concepts shown here and more.
+Check [[Creating-your-first-.js3-file]] guide for  detailed and step-by-step rundown of key concepts shown here and more.
 
 Using the power of JS3
 ---
@@ -110,37 +110,37 @@ Using the power of JS3
 
 > **Change variable's value:** 
 
-```
+```javascript
 JS3.styles1.vars.backgroundColor('green');
 ```
 
 > **Turn a style rule off:**
 
-```
+```javascript
 JS3.styles1.rules.allPadding.off();
 ```
 
 > **Add new style rule:** 
 
-```
+```javascript
 JS3.styles1.styles.basic.rules.add(this.rule('background-color', 'red'));
 ```
 
 > **Add new style to a selector:** 
 
-```
+```javascript
 JS3.styles1.sel.MainArea.styles.add(this.style(this.rule('background-color', 'white')));
 ```
 
 > **Change selector definition itself:** 
 
-```
+```javascript
 JS3.styles1.sel.MainArea('#d3');
 ```
 
 > **Across files re-usability:** Access definitions from other files into current file. 
 
-```
+```javascript
 (function() { 
 
 	.xref('styles2', 'styles3')
@@ -154,7 +154,7 @@ JS3.styles1.sel.MainArea('#d3');
 
 > **Perform batch changes:** 
 
-```
+```javascript
 JS3.suspendUpdates();
 ...
 JS3.styles1.rules.allPadding.off();
@@ -165,7 +165,7 @@ JS3.resumeUpdates();
 
 > **Remain informed:** 
 
-```
+```javascript
 JS3.onChange('myHandler', function(e) {
 
 // e.css holds css object where changes are done
