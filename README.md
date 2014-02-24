@@ -101,7 +101,7 @@ Creating a `.js3` file is simply writing bunch of javascript code lines. Each `j
 }.apply(JS3.css('styles1')));
 ```
 
-Check [[Creating-your-first-.js3-file]] guide for  detailed and step-by-step rundown of key concepts shown here and more.
+Check [[Creating your first .js3 file]] guide for  detailed and step-by-step rundown of key concepts shown here and more.
 
 Using the power of JS3
 ---
