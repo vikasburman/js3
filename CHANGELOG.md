@@ -10,6 +10,7 @@ JS3 Changelog
 
 ##### 0.4.x - &beta; (Next)
 * API documentation completion
+* Better debugging support
 * Full-fledged running example (Basic)
 
 ##### 0.3.6 - &beta; (23 Feb 2014)

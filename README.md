@@ -77,10 +77,11 @@ Creating a `.js3` file is simply writing bunch of javascript code lines. Each `j
 	this
 	
 	// define variables
-	.vars('backgroundColor', 'yellow') 
+	.vars('myColor', 'yellow') 
 
 	// define named rules
 	.rules('allPadding', 'padding', 100, 'px !important')
+	.rules('background', 'background-color', this.vars.myColor)
 	
 	// define named styles
 	.styles('basic', [

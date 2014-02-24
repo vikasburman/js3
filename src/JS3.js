@@ -84,9 +84,11 @@
 			return ("_" + S4() + S4() + '_' + S4() + '_' + S4() + '_' + S4() + '_' + S4() + S4() + S4());		
 		};
 		var getNewId = function() { return 'js3_' + fileName + randomName(); };
+		var newLine = function() { return (self.parent.settings.isGeneratePrettyCSS ? '\n' : ''); };
+		var tab = function() { return (self.parent.settings.isGeneratePrettyCSS ? '\t' : ''); };
 		var generateStyles = function(styles) {
 			var allStyles = '',
-				style = null,		
+				style = null,	
 				index = 0;			
 			for (index = 0; index < styles.length; ++index) {
 				style = styles[index];
@@ -147,7 +149,7 @@
 									selName = sels[index2];
 									if (at.raw.hasSpecialSelectors()) {
 										sel = null;
-										selBody = selName + ' {' + stylesPlaceHolder + '}';
+										selBody = selName + ' {' + newLine() + stylesPlaceHolder + '}' + newLine();
 										atStyles = generateStyles(at.styles(selName));
 										if (atStyles) {
 											styles += selBody.replace(stylesPlaceHolder, atStyles);
@@ -173,7 +175,7 @@
 									}
 								}
 								if (styles) {
-									itemCss = atBody.replace(selsPlaceHolder, styles);
+									itemCss = atBody.replace(selsPlaceHolder, newLine() + styles);
 								}
 							} else {
 								itemCss = atBody;
@@ -181,12 +183,12 @@
 						}
 						break;
 					case valueTypes.dir:
-						itemCss = (typeof item.item === 'string' ? item.item : item.item.apply(self));
+						itemCss = (typeof item.item === 'string' ? item.item : item.item.apply(self)) + newLine();
 						break;
 					default:
 						throw item.item.fName() + notSupported;
 				}
-				css += (itemCss ? ' ' + itemCss : '');
+				css += (itemCss ? itemCss : '');
 			}
 			return css;
 		};		
@@ -464,7 +466,7 @@
 		};		
 		var selValueWrapperFunc = function(selectorOrFuncOrArray) {
 			var getValue = function() { return ''; };
-			var getCompleteSelector = function(selector) { return selector + ' {' + stylesPlaceHolder + '}'; };
+			var getCompleteSelector = function(selector) { return selector + ' {' + newLine() + stylesPlaceHolder + '}' + newLine(); };
 			if (selectorOrFuncOrArray) {
 				if (isFunction(selectorOrFuncOrArray)) {
 					// this is a function
@@ -580,7 +582,7 @@
 				if (propValue) { propValue = propValue.toString(); }
 				if (!propValue) { return ''; }
 				if (propValue.substr(propValue.length - 1 !== ';')) { propValue += ';'; }
-				var ruleDef = propName + ':' + propValue;
+				var ruleDef = tab() + propName + ':' + propValue;
 				if (isAddPrefixes) {
 					if (!allPfxCache) {
 						var pfx = null;
@@ -597,7 +599,7 @@
 					} 
 					var index = 0;
 					for (index = 0; index < allPfxCache.length; ++index) {	
-						ruleDef = (allPfxCache[index] + propName + ':' + propValue) + ruleDef;
+						ruleDef = (tab() + allPfxCache[index] + propName + ':' + propValue + newLine()) + ruleDef;
 					}
 				}
 				return ruleDef;
@@ -645,13 +647,13 @@
 		};
 		var styleWrapper = function(styleName, styleValueWrapper) {
 			var getStyles = function(rules) { 
-				var theStyles = '';
-				var index = 0;
-				var rule = null;
+				var theStyles = '',
+					index = 0,
+					rule = null;
 				for (index = 0; index < rules.length; ++index) {
 					rule = rules[index];
 					if (rule.isOn()) {
-						theStyles += rule.apply(self);
+						theStyles += rule.apply(self) + newLine();
 					}
 				}
 				return theStyles;
@@ -810,7 +812,7 @@
 			var canEmbedSels = (template.indexOf(selsPlaceHolder) !== -1);
 			var atRuleRulearation = function(atRuleQueryOrValue) {
 				atRuleQueryOrValue = atRuleQueryOrValue || ''; 
-				return template.replace(atRuleQueryOrValuePlaceHolder, atRuleQueryOrValue);
+				return template.replace(atRuleQueryOrValuePlaceHolder, atRuleQueryOrValue) + newLine();
 			};
 			var wrapper = function(newAtRuleQueryOrIdentifierOrFunc) {
 				if (newAtRuleQueryOrIdentifierOrFunc) { 
@@ -1116,6 +1118,7 @@
 		core.settings.isLoadExtensions = true;
 		core.settings.isReloadOnChange = true;
 		core.settings.isConsiderScopes = true;
+		core.settings.isGeneratePrettyCSS = false;
 		
 		// state
 		core.state = {};
