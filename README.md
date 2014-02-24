@@ -123,13 +123,19 @@ JS3.styles1.rules.allPadding.off();
 > **Add new style rule:** 
 
 ```javascript
-JS3.styles1.styles.basic.rules.add(this.rule('background-color', 'red'));
+JS3.styles1.styles.basic.rules.add(
+	this.rule('background-color', 'red')
+);
 ```
 
 > **Add new style to a selector:** 
 
 ```javascript
-JS3.styles1.sel.MainArea.styles.add(this.style(this.rule('background-color', 'white')));
+JS3.styles1.sel.MainArea.styles.add(
+	this.style(
+		this.rule('background-color', 'white')
+	)
+);
 ```
 
 > **Change selector definition itself:** 
