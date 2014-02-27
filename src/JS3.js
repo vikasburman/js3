@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.3.6',
+		VERSION: '0.4.9',
 		COPYRIGHT: 'Copyright (C) 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
@@ -38,7 +38,7 @@
 			invalidArgument = 'invalid argument',
 			alreadyDefined = ' already defined',
 			notSupported = ' cannot be applied',
-			allItems = [], // {type: 'at'|'sel'|'dir', item: atObject|selObject|direct}
+			allItems = [], // {type: 'at'|'sel'|'direct', item: atObject|selObject|direct}
 			allPfxCache = null,
 			id = '',
 			isLoaded = false,
@@ -55,7 +55,7 @@
 			style: 'style',
 			sel: 'selector',
 			at: 'at',
-			dir: 'dir'
+			dir: 'direct'
 		};
 		var atRules = {
 			cs: 'charset',
@@ -144,7 +144,7 @@
 							if (at.raw.canEmbedSels()) {
 								styles = '';
 								selName = '';
-								sels = at.sels.apply(self);
+								sels = at.sel.apply(self);
 								for (index2 = 0; index2 < sels.length; ++index2) {
 									selName = sels[index2];
 									if (at.raw.hasSpecialSelectors()) {
@@ -842,7 +842,7 @@
 			};
 			wrapper.isOn = function() { return isOn; };
 			if (canEmbedSels) {
-				wrapper.sels = function() { 
+				wrapper.sel = function() { 
 					var sels = [];
 					var selName = '';
 					for (selName in groupedStyles) {
@@ -850,12 +850,13 @@
 					}
 					return sels;
 				};
-				wrapper.sels.define = function(newGroupedStyles) {
+				wrapper.sel.define = function(newGroupedStyles) {
 					groupedStyles = newGroupedStyles;
 					stylesAdded('New selectors and styles', valueTypes.at, atName);
 				};
-				wrapper.sels.add = function(selOrSelName, styles) { 
+				wrapper.sel.add = function(selOrSelName, styles) { 
 					var selName = (typeof selOrSelName === 'string' ? selOrSelName : selOrSelName.fName());
+					styles = (styles ? (isArray(styles) ? styles : [styles]) : []);
 					if (!groupedStyles[selName]) {
 						groupedStyles[selName] = styles;
 					} else {
@@ -863,7 +864,7 @@
 					}
 					stylesAdded(styles.length, valueTypes.sel, selName + ' (under ' + atName + ')');	
 				};	
-				wrapper.sels.remove = function(selOrSelName, style) { 
+				wrapper.sel.remove = function(selOrSelName, style) { 
 					var selName = (typeof selOrSelName === 'string' ? selOrSelName : selOrSelName.fName());
 					if (groupedStyles[selName]) {
 						var index = 0;
@@ -894,26 +895,30 @@
 						}
 					}
 				};	
-				wrapper.sels.remove.all = function() { 
+				wrapper.sel.remove.all = function() { 
 					groupedStyles = {};
 					styleRemoved('All styles', valueTypes.at, atName);
 				};					
-				wrapper.styles = function(selName) { 
+				wrapper.styles = function(selOrSelName) { 
+					var selName = (typeof selOrSelName === 'string' ? selOrSelName : selOrSelName.fName());
 					var styles = [];
 					if (groupedStyles[selName]) { styles = groupedStyles[selName]; }
 					return (isArray(styles) ? styles : [styles]);
 				};	
-				wrapper.styles.value = function(selName) { return generateStyles(wrapper.styles(selName)); };
+				wrapper.styles.value = function(selOrSelName) { 
+					var selName = (typeof selOrSelName === 'string' ? selOrSelName : selOrSelName.fName());
+					return generateStyles(wrapper.styles(selName)); 
+				};
 				wrapper.styles.add = function(selOrSelName, styles) { 
-					return wrapper.sels.add(selOrSelName, styles);
+					return wrapper.sel.add(selOrSelName, styles);
 				};	
 				wrapper.styles.remove = function(selOrSelName, style) { 
-					return wrapper.sels.remove(selOrSelName, style);
+					return wrapper.sel.remove(selOrSelName, style);
 				};	
 				wrapper.styles.remove.all = function(selOrSelName) { 
 					var selName = (typeof selOrSelName === 'string' ? selOrSelName : selOrSelName.id());
 					if (!selName) { 
-						wrapper.sels.remove.all(); 
+						wrapper.sel.remove.all(); 
 					} else {
 						if (groupedStyles[selName]) {
 							groupedStyles[selName] = [];
@@ -1033,12 +1038,12 @@
 			switch(targetType) {
 				case valueTypes.sel:
 					allItems.push({type: valueTypes.sel, item:selOrAtOrDirStringOrFunc});
-					selOrAtOrDirStringOrFunc.styles.add(StylesOrGroupedStylesOrNone);
+					if (StylesOrGroupedStylesOrNone) { selOrAtOrDirStringOrFunc.styles.add(StylesOrGroupedStylesOrNone); }
 					break;
 				case valueTypes.at:
 					allItems.push({type: valueTypes.at, item:selOrAtOrDirStringOrFunc});
-					if (selOrAtOrDirStringOrFunc.raw.canEmbedSels()) {
-						selOrAtOrDirStringOrFunc.sels.define(StylesOrGroupedStylesOrNone);
+					if (selOrAtOrDirStringOrFunc.raw.canEmbedSels() && StylesOrGroupedStylesOrNone) {
+						selOrAtOrDirStringOrFunc.sel.define(StylesOrGroupedStylesOrNone);
 					}
 					break;
 				case valueTypes.dir:

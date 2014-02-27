@@ -1,17 +1,21 @@
 JS3 Changelog
 ===
 
-##### 0.5.x - &beta; (Future)
+##### 0.6.x - &beta; (Future)
 
 * Issue fixes
 * Property specific extensions
 * CSS to JS3 porting for an easy switch to JS3 for existing work
 * Sample JS3 files (ports of few standard CSS files)
 
-##### 0.4.x - &beta; (Next)
-* API documentation completion
-* Better debugging support
+##### 0.5.x - &beta; (Next)
+
 * Full-fledged running example (Basic)
+
+##### 0.4.9 - &beta; (27 Feb 2014)
+* Minor API standardization
+* Core API documentation completed
+* Better debugging support via pretty style generation
 
 ##### 0.3.6 - &beta; (23 Feb 2014)
 
