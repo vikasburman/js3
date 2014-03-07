@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.5.7',
+		VERSION: '0.6.2',
 		COPYRIGHT: 'Copyright (C) 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
@@ -130,16 +130,19 @@
 						sel = item.item;
 						if (sel.isOn()) {
 							selBody = sel.apply(self);
-							styles = selBody.replace(stylesPlaceHolder, generateStyles(sel.styles()));
-							if (styles) {
+							var cleanStyles = selBody.replace(stylesPlaceHolder, generateStyles(sel.styles()));
+							if (cleanStyles) {
 								// add scopes, if required
 								if (sel.raw.canBeScoped() && 
 									self.parent.settings.isConsiderScopes && 
 									selectorScopes.length > 0) {
+									styles = '';
 									for (index2 = 0; index2 < selectorScopes.length; ++index2) {
 										scope = selectorScopes[index2];
-										styles += (scope + ' ' + styles);
+										styles += (scope + ' ' + cleanStyles);
 									}
+								} else {
+									styles = cleanStyles;
 								}
 								itemCss = styles;
 								if (isDebugging) { window.console.log('selector: ' + sel.fName() + ' >> ' + itemCss); }
@@ -162,10 +165,15 @@
 									selName = sels[index2];
 									if (at.raw.hasSpecialSelectors()) {
 										sel = null;
-										selBody = selName + ' {' + newLine() + stylesPlaceHolder + '}' + newLine();
-										atStyles = generateStyles(at.styles(selName));
-										if (atStyles) {
-											styles += selBody.replace(stylesPlaceHolder, atStyles);
+										if (at.raw.rule() === atRules.kf) {
+											selBody = selName + ' {' + newLine() + stylesPlaceHolder + '}' + newLine();
+											atStyles = generateStyles(at.styles(selName));
+											if (atStyles) {
+												styles += selBody.replace(stylesPlaceHolder, atStyles);
+											}
+										} else if (at.raw.rule() === atRules.ff) {
+											selBody = selName + ': ' + stylesPlaceHolder + newLine();
+											// TODO: 
 										}
 									} else {
 										sel = self.sel[selName];
@@ -983,7 +991,7 @@
 			wrapper.raw = {};
 			wrapper.raw.rule = function() { return atRule; };
 			wrapper.raw.canEmbedSels = function() { return canEmbedSels; };
-			wrapper.raw.hasSpecialSelectors = function() { return (atRule === atRules.kf); };
+			wrapper.raw.hasSpecialSelectors = function() { return (atRule === atRules.kf || atRules.ff); };
 			wrapper.raw.value = function() { return atValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
 			self.parent.ex.me(self, wrapper, valueTypes.at, '', atRule);

@@ -1,0 +1,84 @@
+(function() { 
+	this
+	
+	// prefixes
+	.pfx('Mozilla', '-moz-')
+	.pfx('WebKit', '-webkit-')
+	
+	// variables
+	.vars('lightColor', '#F5F6CE') 
+	.vars('borderColor', 'lightgray')  
+	.vars({						 
+		size: 11,
+		unit: 'px'
+	}) 
+	
+	// named style rules
+	.rules('allMargin', 'margin', 5, this.vars.unit) 					
+	.rules('allPadding', 'padding', function() { return 'medium'; }, {  
+		tiny: 5,
+		small: 10,
+		medium: 15,
+		large: 25,
+		xLarge: 50
+	}, this.vars.unit) 
+	.rules('CodeColor', 'color', 'blue')
+	
+	// named styles
+	.styles('basic', [
+		this.rule('color', 'black'),						
+		this.rule('background-color', this.vars.lightColor) 
+	])
+	.styles('spacing', [
+		this.rules.allMargin, 							   
+		this.rules.allPadding						   
+	])
+	.styles('borders', [
+		this.rule('border', '1px dashed red'),
+		this.rule('border-color', this.vars.borderColor),	
+		this.rule(true, 'border-radius', 25, this.vars.unit)	
+	])	
+	.styles('leftPane', [
+		this.rule('width', 70, '%'),				    
+		this.rule('float', 'left')					   
+	])
+	.styles('rightPane', [
+		this.rule('width', 25, '%'),					    
+		this.rule('float', 'right')
+	])
+	.styles('code', [
+		this.rule('font-family', 'monospace')
+	])
+	
+	// selectors
+	.sel('Everywhere', 'body')
+	.sel('Root', '#root')
+	.sel('AllDivs', 'div')
+	.sel('CodeLines', '.content li')
+	.sel('LeftPane', '#left')
+	.sel('RightPane', '#right')
+	.sel('AllPanes', ['#left', '#right'])
+	.sel('WidgetsContainer', '.widgets')
+	.sel('AllWidgets', '.widget')
+
+	// ats
+	.at('UTF8Chars', 'charset', 'UTF-8')
+	
+	// write styles
+	.write(this.at.UTF8Chars)
+	.write(this.sel.Root, this.style(this.rule('width', 100, '%')))	
+	.write(this.sel.CodeLines, this.styles.code)
+	.write(this.sel.Everywhere, [
+		this.styles.basic,	
+		this.styles.spacing
+	])
+	.write(this.sel.AllDivs, this.styles.borders)					
+	.write(this.sel.LeftPane, this.styles.leftPane)
+	.write(this.sel.RightPane, this.styles.rightPane)
+	.write(this.sel.AllWidgets, this.style(this.rule('padding-bottom', 20, this.vars.unit)))
+	
+	.write('/* some comments */')					
+	
+	// done
+	.end(); 
+}.apply(JS3.css('normal')));

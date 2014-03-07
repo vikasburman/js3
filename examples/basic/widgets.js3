@@ -1,0 +1,36 @@
+(function() { 
+	this
+	
+	// dependency
+	.xref('normal')
+
+	.rules('scrollers', 'overflow', 'auto')
+	
+	.styles('header', this.rule('color', 'red'))
+	.styles('content', [
+		this.rules.scrollers,
+		this.rule('color', 'blue')
+	])
+	.styles('footer', this.rule('font-style', 'underline'))
+	
+	// selectors (in context of widget)
+	.sel('Header', '.header', true)
+	.sel('Content', '.content', true)
+	.sel('Footer', '.footer', true)
+	
+	// write styles
+	.write(this.sel.Header, this.styles.header)
+	.write(this.sel.Content, this.style([
+		this.styles.content,
+		this.rule('height', 50, JS3.normal.vars.unit)
+	]))
+	.write(this.sel.Footer, this.style([
+		this.styles.footer,
+		this.rule('color', 'magenta'),
+		this.rule('text-align', 'right'),
+		this.rule('font-size', JS3.normal.vars.size, JS3.normal.vars.unit)
+	]))
+
+	// done (delay loading)
+	.done(); 
+}.apply(JS3.css('widgets')));
