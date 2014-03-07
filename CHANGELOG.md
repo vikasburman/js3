@@ -13,6 +13,11 @@ JS3 Changelog
 * Issue fixes
 * Full-fledged running example (Basic)
 
+##### 0.5.7 - &beta; (07 Mar 2014)
+
+* Issues fixed
+* Distribution files updated
+
 ##### 0.5.5 - &beta; (07 Mar 2014)
 
 * Issues fixed

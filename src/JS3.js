@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.5.5',
+		VERSION: '0.5.7',
 		COPYRIGHT: 'Copyright (C) 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
@@ -869,9 +869,9 @@
 			};
 			var wrapper = function(newAtRuleQueryOrIdentifierOrFunc) {
 				if (newAtRuleQueryOrIdentifierOrFunc) { 
-					var oldValue = atRuleRulearation(atValueWrapper()); 
+					var oldValue = atRuleDeclaration(atValueWrapper()); 
 					atValueWrapper = atValueWrapperFunc(newAtRuleQueryOrIdentifierOrFunc); 
-					valueChanged(valueTypes.at, atName, oldValue, atRuleRulearation(atValueWrapper())); 
+					valueChanged(valueTypes.at, atName, oldValue, atRuleDeclaration(atValueWrapper())); 
 				}
 				return atRuleDeclaration(atValueWrapper());
 			};
