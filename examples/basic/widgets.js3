@@ -20,16 +20,18 @@
 	
 	// write styles
 	.write(this.sel.Header, this.styles.header)
-	.write(this.sel.Content, this.style([
+	.write(this.sel.Content, [
 		this.styles.content,
-		this.rule('height', 50, JS3.normal.vars.unit)
-	]))
-	.write(this.sel.Footer, this.style([
+		this.style(this.rule('height', 50, JS3.normal.vars.unit))
+	])
+	.write(this.sel.Footer, [
 		this.styles.footer,
-		this.rule('color', 'magenta'),
-		this.rule('text-align', 'right'),
-		this.rule('font-size', JS3.normal.vars.size, JS3.normal.vars.unit)
-	]))
+		this.style([
+		    this.rule('color', 'magenta'),
+		    this.rule('text-align', 'right'),
+		    this.rule('font-size', JS3.normal.vars.size, JS3.normal.vars.unit)
+		])
+	])
 
 	// done (delay loading)
 	.done(); 

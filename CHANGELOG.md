@@ -11,6 +11,10 @@ JS3 Changelog
 * Issue fixes
 * Property specific extensions
 
+##### 0.6.4 - &beta; (07 Mar 2014)
+
+* Issue fixed
+
 ##### 0.6.2 - &beta; (07 Mar 2014)
 
 * Issue fixed
