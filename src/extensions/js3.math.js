@@ -20,7 +20,7 @@
 			if (typeof number !== 'number') { throw 'invalid argument'; }
 			wrapper(wrapper.raw.value() + number); // update
 		};
-		wrapper.substract = function(number) {
+		wrapper.subtract = function(number) {
 			if (typeof number !== 'number') { throw 'invalid argument'; }
 			wrapper(wrapper.raw.value() - number); // update			
 		};

@@ -17,10 +17,15 @@
 	.rules('allPadding2', 'padding', '200', 'px !important')
 	
 	// named styles
-	.styles('basic', [
-		this.rules.allPadding,
-		this.rule('background-color', this.vars.color) // in-place rule
-	])
+	.styles('basic', function() { return 'first'; }, {
+		first: [
+			this.rules.allPadding,
+			this.rule('background-color', this.vars.color) // in-place rule
+			],
+		second: [
+			this.rule('background-color', 'green')
+		]
+	})
 	.styles('basic2', this.rule('color', 'red'))
 	.styles('basic3', this.rule('color', 'blue'))
 	.styles('basic4', this.rule('font-style', 'underline'))

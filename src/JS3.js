@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.4.9',
+		VERSION: '0.5.5',
 		COPYRIGHT: 'Copyright (C) 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
@@ -37,7 +37,8 @@
 			atRuleQueryOrValuePlaceHolder = '$VALUE$',
 			invalidArgument = 'invalid argument',
 			alreadyDefined = ' already defined',
-			notSupported = ' cannot be applied',
+			canNotBeApplied = ' cannot be applied',
+			notSupported = 'not supported',
 			allItems = [], // {type: 'at'|'sel'|'direct', item: atObject|selObject|direct}
 			allPfxCache = null,
 			id = '',
@@ -88,12 +89,18 @@
 		var tab = function() { return (self.parent.settings.isGeneratePrettyCSS ? '\t' : ''); };
 		var generateStyles = function(styles) {
 			var allStyles = '',
-				style = null,	
+				style = null,
+				styleValue = '',
+				isDebugging = self.parent.settings.isDebugging,
 				index = 0;			
 			for (index = 0; index < styles.length; ++index) {
 				style = styles[index];
 				if (style.isOn()) {
-					allStyles += ' ' + style.apply(self);
+					styleValue = style.apply(self);
+					allStyles += ' ' + styleValue;
+					if (isDebugging) { window.console.log('style: ' + style.fName() + ' >> ' + styleValue); }
+				} else {
+					if (isDebugging) { window.console.log('style: ' + style.fName() + ' >> (skipped)'); }
 				}
 			}
 			return allStyles;
@@ -104,6 +111,7 @@
 				at = null,
 				sel = null,
 				itemCss = '',
+				isDebugging = self.parent.settings.isDebugging,
 				sels = null,
 				styles = '',
 				atStyles = '',
@@ -134,7 +142,12 @@
 									}
 								}
 								itemCss = styles;
+								if (isDebugging) { window.console.log('selector: ' + sel.fName() + ' >> ' + itemCss); }
+							} else {
+								if (isDebugging) { window.console.log('selector: ' + sel.fName() + ' >> (no styles)'); }
 							}
+						} else {
+							if (isDebugging) { window.console.log('selector: ' + sel.fName() + ' >> (skipped)'); }
 						}
 						break;
 					case valueTypes.at:
@@ -176,17 +189,23 @@
 								}
 								if (styles) {
 									itemCss = atBody.replace(selsPlaceHolder, newLine() + styles);
+									if (isDebugging) { window.console.log('at rule: ' + at.fName() + ' >> ' + itemCss); }
+								} else {
+									if (isDebugging) { window.console.log('at rule: ' + at.fName() + ' >> (no styles)'); }
 								}
 							} else {
 								itemCss = atBody;
+								if (isDebugging) { window.console.log('at rule: ' + at.fName() + ' >> ' + atBody); }
 							}
+						} else {
+							if (isDebugging) { window.console.log('at rule: ' + at.fName() + ' >> (skipped)'); }
 						}
 						break;
 					case valueTypes.dir:
 						itemCss = (typeof item.item === 'string' ? item.item : item.item.apply(self)) + newLine();
 						break;
 					default:
-						throw item.item.fName() + notSupported;
+						throw item.item.fName() + canNotBeApplied;
 				}
 				css += (itemCss || '');
 			}
@@ -616,6 +635,7 @@
 			};
 			var ruleId = randomName();
 			var isOn = true;
+			var propValueWrapperLast = null;
 			wrapper.id = function() { return ruleId; };			
 			wrapper.type = function() { return valueTypes.rule; };
 			wrapper.fName = function() { return ruleName; };
@@ -632,6 +652,19 @@
 				}			
 			};
 			wrapper.isOn = function() { return isOn; };			
+			wrapper.reset = function(interactiveKeyOrIndex) {
+				if (!propValueWrapper.last.valueSuffixOrValueArrayOrValueLiteral) { throw notSupported; }
+				if (interactiveKeyOrIndex) {
+					if (!propValueWrapperLast) { propValueWrapperLast = propValueWrapper.last; } 
+					wrapper(function() { return interactiveKeyOrIndex; }); 
+				} else {
+					if (propValueWrapperLast) { 
+						propValueWrapper.last = propValueWrapperLast; 
+						propValueWrapperLast = null;
+					}
+					wrapper(propValueWrapper.last.valueOrValueFuncOrCondFunc);
+				}
+			};
 			wrapper.raw = {};
 			wrapper.raw.property = function() { return propName; };
 			wrapper.raw.hasPrefixes = function() { return isAddPrefixes; };
@@ -649,11 +682,17 @@
 			var getStyles = function(rules) { 
 				var theStyles = '',
 					index = 0,
+					ruleValue = '',
+					isDebugging = self.parent.settings.isDebugging,
 					rule = null;
 				for (index = 0; index < rules.length; ++index) {
 					rule = rules[index];
 					if (rule.isOn()) {
-						theStyles += rule.apply(self) + newLine();
+						ruleValue = rule.apply(self);
+						theStyles +=  ruleValue + newLine();
+						if (isDebugging) { window.console.log('style rule: ' + rule.fName() + ' >> ' + ruleValue); }
+					} else {
+						if (isDebugging) { window.console.log('style rule: ' + rule.fName() + ' >> (skipped)'); }
 					}
 				}
 				return theStyles;
@@ -669,6 +708,7 @@
 			};
 			var styleId = randomName();
 			var isOn = true;
+			var styleValueWrapperLast = null;
 			wrapper.id = function() { return styleId; };
 			wrapper.type = function() { return valueTypes.style; };
 			wrapper.fName = function() { return styleName; };
@@ -727,6 +767,19 @@
 			};
 			wrapper.rules.remove.all = function() {
 				wrapper([]); // update it
+			};
+			wrapper.reset = function(interactiveKeyOrIndex) {
+				if (!styleValueWrapper.last.ruleArrayOrRuleLiteral) { throw notSupported; }
+				if (interactiveKeyOrIndex) {
+					if (!styleValueWrapperLast) { styleValueWrapperLast = styleValueWrapper.last; } 
+					wrapper(function() { return interactiveKeyOrIndex; }); 
+				} else {
+					if (styleValueWrapperLast) { 
+						styleValueWrapper.last = styleValueWrapperLast; 
+						styleValueWrapperLast = null;
+					}
+					wrapper(styleValueWrapper.last.ruleArrayOrRuleArrayFuncOrCondFunc);
+				}
 			};
 			wrapper.raw = {};
 			wrapper.raw.value = function() { return styleValueWrapper.plain(); };
@@ -810,7 +863,7 @@
 			var template = atRuleTemplates[atRule.toLowerCase()];
 			if (!template) { throw invalidArgument; }
 			var canEmbedSels = (template.indexOf(selsPlaceHolder) !== -1);
-			var atRuleRulearation = function(atRuleQueryOrValue) {
+			var atRuleDeclaration = function(atRuleQueryOrValue) {
 				atRuleQueryOrValue = atRuleQueryOrValue || ''; 
 				return template.replace(atRuleQueryOrValuePlaceHolder, atRuleQueryOrValue) + newLine();
 			};
@@ -820,7 +873,7 @@
 					atValueWrapper = atValueWrapperFunc(newAtRuleQueryOrIdentifierOrFunc); 
 					valueChanged(valueTypes.at, atName, oldValue, atRuleRulearation(atValueWrapper())); 
 				}
-				return atRuleRulearation(atValueWrapper());
+				return atRuleDeclaration(atValueWrapper());
 			};
 			var atId = randomName();
 			var groupedStyles = {};
@@ -1060,6 +1113,7 @@
 			if (!isEnd) {
 				isDirty = true;
 				isDone = true;
+				if (self.parent.settings.isDebugging) { window.console.log('complete: Marked as done. Not loaded yet.'); }
 			}
 		};
 		self.load = function() {
@@ -1071,6 +1125,7 @@
 					}					
 					isDirty = true; 
 					self.reload();
+					if (self.parent.settings.isDebugging) { window.console.log('complete: Loaded.'); }
 				}
 			}
 		};
@@ -1079,6 +1134,7 @@
 				isDirty = true; 
 				isEnd = true;
 				self.reload();
+				if (self.parent.settings.isDebugging) { window.console.log('complete: Loaded.'); }
 			}
 		};
 		
@@ -1088,7 +1144,7 @@
 		self.isChanged = function() { return isDirty; };
 		self.name = function() { return objectName; };
 		self.reload = function(isForceReload) { 
-			if ((((isDirty && !isDone) || (isDirty && isDone && isLoadAfterDone)) && !self.parent.state.isUpdatesSuspended) || isForceReload) { 
+			if ((((isDirty && !isDone) || (isDirty && isDone && isLoadAfterDone)) && !self.parent.state.isUpdatesSuspended) || (isForceReload && (isLoadAfterDone || isEnd))) { 
 				loadCSS(); 
 				if (xref) { self.parent.reload.dependents(objectName, isForceReload); }
 			}
@@ -1124,6 +1180,7 @@
 		core.settings.isReloadOnChange = true;
 		core.settings.isConsiderScopes = true;
 		core.settings.isGeneratePrettyCSS = false;
+		core.settings.isDebugging = false;
 		
 		// state
 		core.state = {};

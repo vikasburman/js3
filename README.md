@@ -187,7 +187,7 @@ JS3.onChange('myHandler', function(e) {
 * Rich object model built around CSS concepts: selectors, style rules, at-rules, etc. brings in required flexibility and helps in flattening JS3 learning curve
 * Defining styles separately from selectors aids in maximum re-usability
 * Core engine provides utmost control when dealing with multiple stylesheets
-* Extensions helps in bringing domain (i.e., css) specific functionality right at the place of use
+* Extensions help in bringing domain (i.e., css) specific functionality right at the place of use
 * Scopes helps in loading styles in a shared space without bleeding outside defined boundaries
 
 Documentation
