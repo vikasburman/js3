@@ -89,11 +89,17 @@ Creating a `.js3` file is simply writing bunch of javascript code lines. Each `j
 
 	// define named rules
 	.rules('allPadding', 'padding', 100, 'px !important')
+	.rules('allMargin', 'margin', function() { return 'medium'; }, {
+		small: 5,
+		medium: 10,
+		large: 20,
+	}, 'px')
 	.rules('background', 'background-color', this.vars.myColor)
 	
 	// define named styles
 	.styles('basic', [
-		this.rules.allPadding
+		this.rules.allPadding,
+		this.rules.allMargin,
 	])
 	
 	// define selectors
@@ -126,6 +132,12 @@ JS3.styles1.vars.backgroundColor('green');
 
 ```javascript
 JS3.styles1.rules.allPadding.add(10);
+```
+
+> **Change style rule value, from predefined set:**
+
+```javascript
+JS3.styles1.rules.allMargin.reset('large');
 ```
 
 > **Turn a style rule off:**
