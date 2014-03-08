@@ -245,11 +245,6 @@ There are several projects which are on similar lines, i.e., CSS and JavaScript 
 
 *If you find something else that is coming up on similar lines, please share your findings and I will incorporate it here for everyone's reference.*
 
-Who is using it?
----
-
-If you are using JS3 in your project, drop me a mail at [vikasburman@yahoo.com](mailto:vikasburman@yahoo.com) and I will include your citation and/or project reference here.
-
 License
 ---
 Copyright (C) 2014 Vikas Burman. All rights reserved.
