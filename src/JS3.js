@@ -1126,7 +1126,7 @@
 		};
 		self.load = function() {
 			if (isDone) {
-				if (!isLoadAfterDone) {
+				if (!isLoadAfterDone || (isLoadAfterDone && !isLoaded)) {
 					isLoadAfterDone = true;
 					if (arguments.length > 0) { 
 						selectorScopes = Array.prototype.slice.call(arguments, 0);
