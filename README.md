@@ -8,11 +8,11 @@ Introduction
 
 As more and more development is moving towards client side, different opportunities are opening up and traditional styles of doing everything are undergoing drastic changes. CSS is one such case.
 
-CSSes used to be static style definitions, but with pre-processors like LESS and SASS, CSS management becomes much easier. With pre-processors, static stylesheets get some life in form of variables, mixins, inheritance, etc. However once processed, they again become static CSS files. Therefore all that liveliness remained inside the xxSS execution engine where xxSS processing happens.
+CSSes are static style definitions, but with pre-processors like LESS and SASS, adding dynamism to CSS becomes much easier, although limited to design-time. With pre-processors, static stylesheets get some life in form of variables, mixins, inheritance, etc. However once processed, they again become static CSS files. Therefore all such liveliness still remains inside the xxSS execution engine. 
 
-**This is where JS3 brings the difference.** It creates *live* CSS. A *live* CSS is a javascript object that transparently writes/updates CSS (in browser) in real-time, as you play with this object. 
+With the help of javascript, styles can still be manipulated at run-time, both at element level (e.g., using $.css(...)) as well as global level (e.g., using document.styleSheets). However updating values using former approach changes specificity, while using later approach is tedious and raw. 
 
-You no longer need to think in terms of having different class for different scenarios and using javascript switch classes. JS3 gives access to each style rule, collections, selectors, etc. as an object which you can play around with directly or indirectly with embedded javascript functions.
+**This is where JS3 brings the difference.** It creates *live* CSS. A *live* CSS is a javascript object that transparently writes/updates CSS (in browser) in real-time, as you play with this object. You get the best of both worlds, LESS, SASS type design-time dynamism that can be applied at run-time using plain Javascript.
 
 JS3 can load predefined *.js3 files (comparable to *.css files) or can even define a new CSS on the fly using pure javascript. 
 

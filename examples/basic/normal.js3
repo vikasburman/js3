@@ -63,9 +63,14 @@
 
 	// ats
 	.at('UTF8Chars', 'charset', 'UTF-8')
+	.at('Font', 'font-face')
 	
 	// write styles
 	.write(this.at.UTF8Chars)
+	.write(this.at.Font, this.style([
+		this.rule('font-family', 'Bitstream Vera Serif Bold'),
+		this.rule('src', 'url("http://developer.mozilla.org/@api/deki/files/2934/=VeraSeBd.ttf")')
+	]))
 	.write(this.sel.Root, this.style(this.rule('width', 100, '%')))	
 	.write(this.sel.CodeLines, this.styles.code)
 	.write(this.sel.Everywhere, [

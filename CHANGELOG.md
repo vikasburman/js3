@@ -1,15 +1,22 @@
 JS3 Changelog
 ===
 
-##### 0.8.x - &beta; (Future)
+##### 0.9.x - &beta; (Future)
 
 * CSS to JS3 porting for an easy switch to JS3 for existing work
 * Sample JS3 files (ports of few standard CSS files)
 
-##### 0.7.x - &beta; (Next)
+##### 0.8.x - &beta; (Next)
 
 * Issue fixes
 * Property specific extensions
+
+##### 0.7.1 - &beta; (08 Mar 2014)
+
+* Issues fixed
+* Unload, reload anomalies resolved 
+* Directly embedded styles under atRule are now supported (@font-face case)
+* API Documentation updated
 
 ##### 0.6.4 - &beta; (07 Mar 2014)
 

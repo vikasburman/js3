@@ -20,7 +20,7 @@
 	var CONST = {
 		NAME: 'JS3',
 		TITLE: 'JavaScript Style Sheets',
-		VERSION: '0.6.4',
+		VERSION: '0.7.1',
 		COPYRIGHT: 'Copyright (C) 2014 Vikas Burman. All rights reserved.',
 		URL: 'https://github.com/vikasburman/js3'
 	};	
@@ -43,10 +43,10 @@
 			allPfxCache = null,
 			id = '',
 			isLoaded = false,
-			xref = false,
 			isDirty = false,
 			isDone = false,
 			isLoadAfterDone = false,
+			isManuallyUnloaded = false,
 			isEnd = false,
 			selectorScopes = [];
 		var valueTypes = {
@@ -71,7 +71,7 @@
 		};
 		var atRuleTemplates = {
 			'charset': '@charset "' + atRuleQueryOrValuePlaceHolder + '";',
-			'font-face': '@font-face {' + selsPlaceHolder + '}',
+			'font-face': '@font-face {' + stylesPlaceHolder + '}',
 			'import': '@import ' + atRuleQueryOrValuePlaceHolder + ';',
 			'namespace': '@namespace ' + atRuleQueryOrValuePlaceHolder + ';',
 			'page': '@page ' + atRuleQueryOrValuePlaceHolder + ' {' + selsPlaceHolder + '}',
@@ -119,6 +119,7 @@
 				selName = '',
 				selBody = '',
 				atBody = '',
+				cleanStyles = '',
 				index2 = 0,
 				index3 = 0,
 				scope = '';
@@ -130,7 +131,7 @@
 						sel = item.item;
 						if (sel.isOn()) {
 							selBody = sel.apply(self);
-							var cleanStyles = selBody.replace(stylesPlaceHolder, generateStyles(sel.styles()));
+							cleanStyles = selBody.replace(stylesPlaceHolder, generateStyles(sel.styles()));
 							if (cleanStyles) {
 								// add scopes, if required
 								if (sel.raw.canBeScoped() && 
@@ -165,15 +166,10 @@
 									selName = sels[index2];
 									if (at.raw.hasSpecialSelectors()) {
 										sel = null;
-										if (at.raw.rule() === atRules.kf) {
-											selBody = selName + ' {' + newLine() + stylesPlaceHolder + '}' + newLine();
-											atStyles = generateStyles(at.styles(selName));
-											if (atStyles) {
-												styles += selBody.replace(stylesPlaceHolder, atStyles);
-											}
-										} else if (at.raw.rule() === atRules.ff) {
-											selBody = selName + ': ' + stylesPlaceHolder + newLine();
-											// TODO: 
+										selBody = selName + ' {' + newLine() + stylesPlaceHolder + '}' + newLine();
+										atStyles = generateStyles(at.styles(selName));
+										if (atStyles) {
+											styles += selBody.replace(stylesPlaceHolder, atStyles);
 										}
 									} else {
 										sel = self.sel[selName];
@@ -197,6 +193,14 @@
 								}
 								if (styles) {
 									itemCss = atBody.replace(selsPlaceHolder, newLine() + styles);
+									if (isDebugging) { window.console.log('at rule: ' + at.fName() + ' >> ' + itemCss); }
+								} else {
+									if (isDebugging) { window.console.log('at rule: ' + at.fName() + ' >> (no styles)'); }
+								}
+							} else if (at.raw.canEmbedStyles()) {
+								atStyles = generateStyles(at.styles());
+								if (atStyles) {
+									itemCss += atBody.replace(stylesPlaceHolder, atStyles);
 									if (isDebugging) { window.console.log('at rule: ' + at.fName() + ' >> ' + itemCss); }
 								} else {
 									if (isDebugging) { window.console.log('at rule: ' + at.fName() + ' >> (no styles)'); }
@@ -251,7 +255,7 @@
 			}	
 		};
 		
-		// definition
+		// private definitions
 		var stylesAdded = function(count, type, to) {
 			isDirty = true;
 			if (isLoaded && self.parent.settings.isLogChanges) {
@@ -871,6 +875,7 @@
 			var template = atRuleTemplates[atRule.toLowerCase()];
 			if (!template) { throw invalidArgument; }
 			var canEmbedSels = (template.indexOf(selsPlaceHolder) !== -1);
+			var canEmbedStyles = (template.indexOf(stylesPlaceHolder) !== -1);
 			var atRuleDeclaration = function(atRuleQueryOrValue) {
 				atRuleQueryOrValue = atRuleQueryOrValue || ''; 
 				return template.replace(atRuleQueryOrValuePlaceHolder, atRuleQueryOrValue) + newLine();
@@ -885,6 +890,7 @@
 			};
 			var atId = randomName();
 			var groupedStyles = {};
+			var embeddedStyles = [];
 			var isOn = true;
 			wrapper.id = function() { return atId; };
 			wrapper.type = function() { return valueTypes.at; };
@@ -987,22 +993,65 @@
 						}
 					}
 				};				
+			} else if (canEmbedStyles) {
+				wrapper.styles = function() { 
+					return embeddedStyles;
+				};	
+				wrapper.styles.value = function() { 
+					return generateStyles(embeddedStyles); 
+				};
+				wrapper.styles.add = function(styles) { 
+					embeddedStyles = embeddedStyles.concat(styles); // add more
+					stylesAdded(styles.length, valueTypes.at, '(under ' + atName + ')');	
+				};	
+				wrapper.styles.remove = function(style) { 
+					var index = 0;
+					if (embeddedStyles.length > 0) {
+						var styleName = style.fName();
+						var foundAt = -1;
+						var isRemoved = false;
+						while (true) {
+							foundAt = -1;
+							for (index = 0; index < embeddedStyles.length; ++index) {
+								if (embeddedStyles[index].fName() === styleName) {
+									foundAt = index; 
+									break;
+								}
+							}
+							if (foundAt !== -1) {
+								embeddedStyles.splice(foundAt, 1); // remove this
+								isRemoved = true;
+							} else {
+								break; // all instances of given style are removed
+							}
+						}
+						if (isRemoved) {
+							styleRemoved(styleName, valueTypes.at, '(under ' + atName + ')');
+						}	
+					}
+				};	
+				wrapper.styles.remove.all = function() { 
+					if (embeddedStyles.length > 0) {
+						embeddedStyles = [];						
+						styleRemoved('All styles', valueTypes.at, '(under ' + atName + ')');
+					}
+				};
 			}
 			wrapper.raw = {};
 			wrapper.raw.rule = function() { return atRule; };
 			wrapper.raw.canEmbedSels = function() { return canEmbedSels; };
-			wrapper.raw.hasSpecialSelectors = function() { return (atRule === atRules.kf || atRules.ff); };
+			wrapper.raw.canEmbedStyles = function() { return canEmbedStyles; };
+			wrapper.raw.hasSpecialSelectors = function() { return (atRule === atRules.kf); };
 			wrapper.raw.value = function() { return atValueWrapper.plain(); };
 			wrapper.raw.type = function() { return typeof wrapper.raw.value(); };
 			self.parent.ex.me(self, wrapper, valueTypes.at, '', atRule);
 			return wrapper;			
 		};
 		
-		// definitions
+		// public definitions
 		self.xref = function() {
 			if (arguments.length > 0) { 
 				self.parent.xref(objectName, Array.prototype.slice.call(arguments, 0)); 
-				xref = true;
 			}
 			return self;
 		};
@@ -1105,6 +1154,8 @@
 					allItems.push({type: valueTypes.at, item:selOrAtOrDirStringOrFunc});
 					if (selOrAtOrDirStringOrFunc.raw.canEmbedSels() && StylesOrGroupedStylesOrNone) {
 						selOrAtOrDirStringOrFunc.sel.define(StylesOrGroupedStylesOrNone);
+					} else if (selOrAtOrDirStringOrFunc.raw.canEmbedStyles() && StylesOrGroupedStylesOrNone) {
+						selOrAtOrDirStringOrFunc.styles.add(StylesOrGroupedStylesOrNone);
 					}
 					break;
 				case valueTypes.dir:
@@ -1116,7 +1167,7 @@
 			return self;
 		};
 		
-		// either end or (done first and load later will be used)
+		// either end or (done first and load later)
 		self.done = function() {
 			if (!isEnd) {
 				isDirty = true;
@@ -1126,7 +1177,7 @@
 		};
 		self.load = function() {
 			if (isDone) {
-				if (!isLoadAfterDone) {
+				if (!isLoadAfterDone || (isLoadAfterDone && !isLoaded)) {
 					isLoadAfterDone = true;
 					if (arguments.length > 0) { 
 						selectorScopes = Array.prototype.slice.call(arguments, 0);
@@ -1151,22 +1202,25 @@
 		self.id = function() { return id; };
 		self.isChanged = function() { return isDirty; };
 		self.name = function() { return objectName; };
-		self.reload = function(isForceReload) { 
+		self.reload = function(isForceReload, isAutoLoad) { 
 			if ((((isDirty && !isDone) || (isDirty && isDone && isLoadAfterDone)) && !self.parent.state.isUpdatesSuspended) || (isForceReload && (isLoadAfterDone || isEnd))) { 
+				if (isAutoLoad && isManuallyUnloaded) { return; }
 				loadCSS(); 
-				if (xref) { self.parent.reload.dependents(objectName, isForceReload); }
+				isManuallyUnloaded = false;
+				if (self.parent.xref.hasDependents(objectName)) { self.parent.reload.dependents(objectName, isForceReload); }
 			}
 		};
-		self.unload = function() { 
+		self.unload = function(isAutoUnload) { 
 			if (isLoaded) { 
+				if (!isManuallyUnloaded && !isAutoUnload) { isManuallyUnloaded = true; }
 				unloadCSS(); 
-				if (xref) { self.parent.unload.dependents(objectName); }
+				if (self.parent.xref.hasDependents(objectName)) { self.parent.unload.dependents(objectName); }
 			}
 		};
 		self.remove = function() {
 			self.unload();
 			self.parent.css.remove(self.name());
-			if (xref) { self.parent.remove.dependents(objectName); }
+			if (self.parent.xref.hasDependents(objectName)) { self.parent.remove.dependents(objectName); }
 		};
 	};
 	var JS3 = function() {
@@ -1199,17 +1253,23 @@
 		var allFiles = [],
 			xref = {};
 		core.all = function() { return allFiles; };
-		core.xref = function(inFile, otherFilesArray) {
-			var otherFiles = (xref[inFile] || []);
-			var index = 0;
-			var otherFile = '';
-			for (index = 0; index < otherFilesArray.length; ++index) {
-				otherFile = otherFilesArray[index];
-				if (otherFile !== inFile && otherFiles.indexOf(otherFile) === -1) {
-					otherFiles.push(otherFile);
+		core.xref = function(dependentObject, depenentOnObjectsArray) {
+			var dependentOnObject = '',
+				index = 0,
+			    dependents = null;
+			for (index = 0; index < depenentOnObjectsArray.length; ++index) {
+				dependentOnObject = depenentOnObjectsArray[index];
+				if (dependentOnObject !== dependentObject) {
+					dependents = xref[dependentOnObject] || [];
+					if (dependents.indexOf(dependentObject) === -1) { 
+						dependents.push(dependentObject);
+						xref[dependentOnObject] = dependents;
+					}
 				}
 			}
-			xref[inFile] = otherFiles;
+		};
+		core.xref.hasDependents = function(ofObjectName) {
+			return (isArray(xref[ofObjectName]) && xref[ofObjectName].length > 0);
 		};
 		
 		// definition
@@ -1340,7 +1400,7 @@
 			for (index = 0; index < dependentFiles.length; ++index) {
 				dependentFile = dependentFiles[index];
 				css = core[dependentFile];
-				if (css) { css.unload(); }
+				if (css) { css.unload(true); }
 			}
 		};		
 		core.reload = {};
@@ -1360,7 +1420,7 @@
 			for (index = 0; index < dependentFiles.length; ++index) {
 				dependentFile = dependentFiles[index];
 				css = core[dependentFile];
-				if (css) { css.reload(isForceReload); }
+				if (css) { css.reload(isForceReload, true); }
 			}
 		};
 		core.remove = {};
