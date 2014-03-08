@@ -114,6 +114,12 @@ Using the power of JS3
 JS3.styles1.vars.backgroundColor('green');
 ```
 
+> **Perform operations:**
+
+```javascript
+JS3.styles1.rules.allPadding.add(10);
+```
+
 > **Turn a style rule off:**
 
 ```javascript
