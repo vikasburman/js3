@@ -8,7 +8,9 @@ JavaScript StyleSheet - JS3
 
 > * JS3 is for those JavaScript programmers who are into client-side programming but are not very comfortable writing CSS from scratch. It gives them a radical approach of defining and using styles, that is more programmatic in nature.
 * JS3 is for those programmers who think CSS is something that designers will write for them.
-* JS3 is **not for designers**, and in no way JS3 is a replacement of CSS as such.
+* JS3 is **not** intended for designers.
+* JS3 is **not** for scenarios where styles are pretty static and hardly any changes are required at run-time.
+* JS3 is **not** intended to be a replacement of CSS as such.
 
 
 Introduction
