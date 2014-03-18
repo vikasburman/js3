@@ -2,7 +2,6 @@ JavaScript StyleSheet - JS3
 === 
 > Instead of putting programming in CSS, it puts CSS in a programming language. 
 
-<br/>
 
 Introduction
 ---
@@ -159,6 +158,45 @@ JS3.define('demo1', function() {
 	// ends definition and loads css
 	end(); 
 });
+
+```
+
+Above defined .js3 will eventually generate following .css
+
+```css
+
+@charset "utf-8";
+@font-face {
+	font-family: "Bitstream Vera Serif Bold";
+	src: url("http://developer.mozilla.org/@api/deki/files/2934/=VeraSeBd.ttf");
+}
+body {
+	color: black;
+	background-color: rgba(255,255,230,1);
+	padding: 10px;
+	margin: 5px;
+}
+#root {
+	width: 100%;
+}
+.content li {
+	font-family: monospace;
+}
+#left {
+	width: 70%;
+	float: left;
+}
+#right {
+	width: 25%;
+	float: right;
+}
+#right div {
+
+}
+#right .widget {
+	padding-bottom: 20px;
+}
+/* some comments */
 
 ```
 
