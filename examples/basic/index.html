@@ -4,8 +4,10 @@
 	<meta charset="UTF-8">
     <title>JS3 Demo - Basic</title>
 	<script type="text/javascript" src="../../src/JS3.js"></script>
-	<script type="text/javascript" src="./normal.js3"></script>
-	<script type="text/javascript" src="./widgets.js3"></script>
+	<script type="text/javascript" src="../../src/extensions/js3.math.js"></script>
+	<script type="text/javascript" src="../../src/extensions/js3.color.js"></script>
+	<script type="text/javascript" src="./demo1.js3"></script>
+	<script type="text/javascript" src="./demo2.js3"></script>
   </head>
   <body>
 	<div id="root">
@@ -13,7 +15,7 @@
 			<div class="header"><h1>JS3 DEMO - Basic Operations</h1></div>
 			<div class="content">
 				JavaScript Style Sheet (JS3) engine puts CSS inside JavaScript and rest is the power of JavaScript and
-				CSS itself that does all the magic. 
+				CSS put together, that does all the magic. 
 				<p>
 				This demo sets up the environment with JS3 engine and few JavaScript Style Sheets (.js3 files) to make 
 				the playground ready for you to play around with JS3 awesomeness.
@@ -23,25 +25,27 @@
 				place this time. Enjoy!!!
 				<p>
 				<ul>
-					<li>JS3.normal.styles.borders.off()</li>
-					<li>JS3.normal.styles.borders.on()</li>
-					<li>JS3.normal.rules.allMargin(50)</li>
-					<li>JS3.normal.sel.Everywhere.styles.remove(JS3.normal.styles.spacing)</li>
-					<li>JS3.normal.sel.Everywhere.styles.add(JS3.normal.styles.spacing)</li>
-					<li>JS3.normal.styles.code.rules.add(JS3.normal.rules.CodeColor)</li>
-					<li>JS3.normal.styles.code.rules.remove(JS3.normal.rules.CodeColor)</li>
-					<li>JS3.normal.vars.unit('em')</li>
-					<li>JS3.normal.vars.unit('px')</li>
-					<li>JS3.normal.vars.lightColor('yellow')</li>
-					<li>JS3.normal.styles.borders.rules()[2].off()</li>
-					<li>JS3.normal.styles.borders.rules()[2].on()</li>
-					<li title="See styles will bleed out of context"><b>JS3.widgets.load()</b></li>
-					<li>JS3.widgets.unload()</li>
-					<li title="See styles will remain inside given context"><b>JS3.widgets.load(JS3.normal.sel.WidgetsContainer.raw.value())</b></li>
-					<li title="See any changes here onwards will not update"><b>JS3.suspendUpdates()</b></li>
-					<li>JS3.normal.rules.allPadding.reset('xLarge')</li>
-					<li title="See all changes since last suspendUpdates will apply now"><b>JS3.resumeUpdates()</b></li>
-					<li>JS3.normal.rules.allPadding.reset()</li>
+					<li>JS3.demo1.styles.borders.on();</li>
+					<li>JS3.demo1.styles.borders.rules()[1].off();</li>
+					<li>JS3.demo1.styles.borders.rules()[1].on();</li>
+					<li>JS3.demo1.styles.borders.off();</li>
+					<li>JS3.demo1.rules.allMargins(50;)</li>
+					<li>JS3.demo1.vars.unit('em');</li>
+					<li>JS3.demo1.vars.unit('px');</li>
+					<li>JS3.demo1.vars.lightColor('yellow');</li>
+					<li>JS3.demo1.styles.code.rules.add(JS3.demo1.rules.CodeColor);</li>
+					<li>JS3.demo1.styles.code.rules.remove(JS3.demo1.rules.CodeColor);</li>
+					<li>JS3.demo1.styles.basic.select('set2');</li>
+					<li>JS3.demo1.styles.basic.select('set1');</li>
+					<li>JS3.demo1.rules.allPaddings.select('xLarge');</li>
+					<li>JS3.demo1.rules.allPaddings.select('small');</li>
+					<li title="See styles will bleed out of context"><b>JS3.demo2.load();</b></li>
+					<li>JS3.demo2.unload();</li>
+					<li title="See styles will remain inside given context"><b>JS3.demo2.load('.widgets');</b></li>
+					<li title="See any changes here onwards will not update"><b>JS3.suspendUpdates();</b></li>
+					<li>JS3.demo1.styles.borders.on();</li>
+					<li>JS3.demo1.vars.lightColor('yellow');</li>
+					<li title="See all changes since last suspendUpdates will apply now"><b>JS3.resumeUpdates();</b></li>
 				</ul>
 				<p>
 			</div>			

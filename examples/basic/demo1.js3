@@ -1,0 +1,84 @@
+JS3.define('demo1', function() {
+	// define prefixes
+	prefixes('-moz-', '-webkit-');
+	
+	// define variables
+	vars('lightColor', color('yellow')).tint(.9);
+	vars('borderColor', color('lightgray')); 
+	vars({ 		
+		size: 11,
+		unit: 'px'
+	});
+
+	// define re-usable css declarations (called 'rule' here)
+	rule('[allMargins] margin', 5, vars.unit);					
+	rule('[allPaddings] padding', {
+		tiny: 5,
+		small: 10,
+		medium: 15,
+		large: 25,
+		xLarge: 50
+	}, vars.unit).select('small');
+	rule('[CodeColor] color', color('blue'));
+	
+	// define re-usable css declaration blocks (called 'style' here)
+	style('spacing', 
+		rules.allPaddings,						   
+		rules.allMargins
+	);	
+	style('basic', {
+		set1: {
+			color: 'black',
+			'background-color': vars.lightColor
+		},
+		set2: [
+			rule('color', 'blue'),						
+			rule('background-color', vars.borderColor) 
+		]
+	}).select(function() { return 'set1'; });
+
+	style('borders', 
+		rule('[myBorder] border', '1px dashed red'),
+		rule('[allRadius] ~border-radius', 25, vars.unit)	
+	).off();
+	style('code', 
+		rule('font-family', 'monospace')
+	);
+
+	// write CSS, JS3 style
+	$$('@charset', '"utf-8"');
+	$$('@font-face', {
+		'font-family': '"Bitstream Vera Serif Bold"',
+		'src': 'url("http://developer.mozilla.org/@api/deki/files/2934/=VeraSeBd.ttf")'
+	});
+	
+	$$('body', 
+		styles.basic,
+		styles.spacing
+	);
+	$$('#root', { 
+		'width': '100%'
+	});
+	$$('.content li', 
+		styles.code
+	);
+	$$('#left', { 
+		'width': '70%',				    
+		'float': 'left'					   
+	});
+	$$('#right', { 
+		'width': '25%',				    
+		'float': 'right'					   
+		})
+		.$$('div',
+			styles.borders
+		).up()
+		.$$('.widget', 
+			rule('padding-bottom', 20, vars.unit)
+		)
+	
+	$$('&/* some comments */');
+	
+	// ends definition and loads css
+	end(); 
+});

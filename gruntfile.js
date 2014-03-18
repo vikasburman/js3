@@ -19,6 +19,18 @@ module.exports = function(grunt) {
 				src: 'src/<%= pkg.name %>.js',
 				dest: 'dist/<%= pkg.name %>.core.js'
 			}]
+		},
+		ext: {
+			files: [
+			{
+				src: 'src/extensions/js3.math.js',
+				dest: 'dist/extensions/js3.math.js'
+			},
+			{
+				src: 'src/extensions/js3.color.js',
+				dest: 'dist/extensions/js3.color.js'
+			}
+			]
 		}
 	},
 	
@@ -37,7 +49,9 @@ module.exports = function(grunt) {
       dist: {
         files: {
           'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>'],
-          'dist/<%= pkg.name %>.core.min.js': ['<%= copy.main.files[0].dest %>']
+          'dist/<%= pkg.name %>.core.min.js': ['<%= copy.main.files[0].dest %>'],
+          'dist/extensions/js3.math.min.js': ['<%= copy.ext.files[0].dest %>'],
+          'dist/extensions/js3.color.min.js': ['<%= copy.ext.files[1].dest %>']
         }
       }
     },

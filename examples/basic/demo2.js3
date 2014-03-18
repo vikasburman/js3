@@ -1,0 +1,24 @@
+JS3.define('demo2', ['demo1'], function() {
+	// write all in-place styles and rules
+	$$('$ .header', 
+		rule('color', color('red')).shade(.3)
+	);
+	$$('$ .content', 
+		style(
+			demo1.rules.CodeColor,
+			rule('overflow', 'auto'),
+			rule('height', 50, demo1.vars.unit)
+		)
+	);
+	$$('$ .footer', 
+		style(
+			rule('font-style', 'underline'),
+		    rule('color', 'magenta'),
+		    rule('text-align', 'right'),
+		    rule('font-size', demo1.vars.size, demo1.vars.unit)
+		)
+	);
+
+	// done (don't load now)
+	end(false); 
+});
