@@ -3,6 +3,9 @@ JavaScript StyleSheet - JS3
 > Instead of putting programming in CSS, it puts CSS in a programming language. 
 
 
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vikasburman/js3/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
+
 Introduction
 ---
 
