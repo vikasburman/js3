@@ -1,4 +1,4 @@
-JavaScript StyleSheet - JS3
+JavaScript StyleSheet - JS3 ![Bower](https://github.com/benschwarz/bower-badges/blob/gh-pages/badge@2x.png)
 === 
 > Instead of putting programming in CSS, it puts CSS in a programming language. 
 
