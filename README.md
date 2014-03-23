@@ -1,6 +1,3 @@
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vikasburman/js3/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
-
 JavaScript StyleSheet - JS3
 === 
 > Instead of putting programming in CSS, it puts CSS in a programming language. 
@@ -337,3 +334,5 @@ Licensed under the terms of the [MIT license](https://github.com/vikasburman/js3
 
 Disclaimer: JS3 is authored by me (Vikas Burman). The concepts and opinions found here, as well as in code, are my own and do not represent my employers (past, current or future) in any ways.
 <br />
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vikasburman/js3/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
