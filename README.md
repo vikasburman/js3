@@ -3,7 +3,6 @@ JavaScript StyleSheet - JS3
 > Instead of putting programming in CSS, it puts CSS in a programming language. 
 
 
-
 Introduction
 ---
 
@@ -333,6 +332,8 @@ Copyright (C) 2014 Vikas Burman. All rights reserved.
 Licensed under the terms of the [MIT license](https://github.com/vikasburman/js3/blob/master/LICENSE.md). You are free to use **JS3** under any open source or commercial project, as long as this copyright header is left intact.
 
 Disclaimer: JS3 is authored by me (Vikas Burman). The concepts and opinions found here, as well as in code, are my own and do not represent my employers (past, current or future) in any ways.
-<br />
+<br /><br />
+
+
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vikasburman/js3/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
