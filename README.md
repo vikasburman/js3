@@ -335,4 +335,4 @@ Disclaimer: JS3 is authored by me (Vikas Burman). The concepts and opinions foun
 <br /><br />
 
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vikasburman/js3/trend.png)](https://bitdeli.com/free "Bitdeli Badge") ![Bower](https://raw.githubusercontent.com/benschwarz/bower-badges/gh-pages/badge@2x.png)
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vikasburman/js3/trend.png)](https://bitdeli.com/free "Bitdeli Badge") 
