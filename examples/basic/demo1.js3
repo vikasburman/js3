@@ -1,17 +1,17 @@
 JS3.define('demo1', function() {
 	// define prefixes
 	prefixes('-moz-', '-webkit-');
-	
+
 	// define variables
 	vars('lightColor', color('yellow')).tint(.9);
-	vars('borderColor', color('lightgray')); 
-	vars({ 		
+	vars('borderColor', color('lightgray'));
+	vars({
 		size: 11,
 		unit: 'px'
 	});
 
 	// define re-usable css declarations (called 'rule' here)
-	rule('[allMargins] margin', 5, vars.unit);					
+	rule('[allMargins] margin', 5, vars.unit);
 	rule('[allPaddings] padding', {
 		tiny: 5,
 		small: 10,
@@ -20,28 +20,28 @@ JS3.define('demo1', function() {
 		xLarge: 50
 	}, vars.unit).select('small');
 	rule('[CodeColor] color', color('blue'));
-	
+
 	// define re-usable css declaration blocks (called 'style' here)
-	style('spacing', 
-		rules.allPaddings,						   
+	style('spacing',
+		rules.allPaddings,
 		rules.allMargins
-	);	
+	);
 	style('basic', {
 		set1: {
 			color: 'black',
 			'background-color': vars.lightColor
 		},
 		set2: [
-			rule('color', 'blue'),						
-			rule('background-color', vars.borderColor) 
+			rule('color', 'blue'),
+			rule('background-color', vars.borderColor)
 		]
 	}).select(function() { return 'set1'; });
 
-	style('borders', 
+	style('borders',
 		rule('[myBorder] border', '1px dashed red'),
-		rule('[allRadius] ~border-radius', 25, vars.unit)	
+		rule('[allRadius] ~border-radius', 25, vars.unit)
 	).off();
-	style('code', 
+	style('code',
 		rule('font-family', 'monospace')
 	);
 
@@ -51,34 +51,34 @@ JS3.define('demo1', function() {
 		'font-family': '"Bitstream Vera Serif Bold"',
 		'src': 'url("http://developer.mozilla.org/@api/deki/files/2934/=VeraSeBd.ttf")'
 	});
-	
-	$$('body', 
+
+	$$('body',
 		styles.basic,
 		styles.spacing
 	);
-	$$('#root', { 
+	$$('#root', {
 		'width': '100%'
 	});
-	$$('.content li', 
+	$$('.content li',
 		styles.code
 	);
-	$$('#left', { 
-		'width': '70%',				    
-		'float': 'left'					   
+	$$('#left', {
+		'width': '70%',
+		'float': 'left'
 	});
-	$$('#right', { 
-		'width': '25%',				    
-		'float': 'right'					   
+	$$('#right', {
+		'width': '25%',
+		'float': 'right'
 		})
 		.$$('div',
 			styles.borders
 		).up()
-		.$$('.widget', 
+		.$$('.widget',
 			rule('padding-bottom', 20, vars.unit)
 		)
-	
+
 	$$('&/* some comments */');
-	
+
 	// ends definition and loads css
-	end(); 
+	end();
 });
